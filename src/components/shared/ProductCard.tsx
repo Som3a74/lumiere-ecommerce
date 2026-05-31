@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { WishlistButton } from "@/components/shared/WishlistButton";
 
 interface ProductCardProps {
+  productId?: string;
   title: string;
   price: string;
   category?: string;
@@ -9,9 +11,11 @@ interface ProductCardProps {
   imageAlt?: string;
   href: string;
   className?: string;
+  isWishlisted?: boolean;
 }
 
 export function ProductCard({
+  productId,
   title,
   price,
   category,
@@ -19,6 +23,7 @@ export function ProductCard({
   imageAlt,
   href,
   className,
+  isWishlisted = false,
 }: ProductCardProps) {
   return (
     <article className={cn("group cursor-pointer", className)}>
@@ -31,9 +36,13 @@ export function ProductCard({
             src={imageUrl}
           />
         </Link>
-        <button className="absolute top-4 right-4 p-2 text-primary/50 hover:text-primary transition-colors z-10 bg-white/50 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 duration-300">
-          <span className="material-symbols-outlined">favorite</span>
-        </button>
+        {productId && (
+          <WishlistButton 
+            productId={productId} 
+            initialIsWishlisted={isWishlisted}
+            className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 duration-300"
+          />
+        )}
       </div>
       <div className="text-center">
         {category && (

@@ -1,4 +1,6 @@
 import Link from "next/link"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 
 export function Footer() {
   return (
@@ -33,10 +35,10 @@ export function Footer() {
           <span className="font-label-caps text-label-caps uppercase tracking-widest text-primary dark:text-surface-bright font-semibold mb-2">Newsletter</span>
           <p className="font-body-md text-body-md text-secondary dark:text-on-secondary-container mb-2">Subscribe to receive exclusive communications.</p>
           <div className="relative w-full">
-            <input className="w-full bg-transparent border-0 border-b border-surface-dim focus:border-primary focus:ring-0 px-0 py-2 font-body-md text-body-md text-primary placeholder:text-secondary-fixed-dim transition-colors" placeholder="Email Address" type="email" />
-            <button className="absolute right-0 top-1/2 -translate-y-1/2 text-primary hover:text-tertiary-fixed-dim transition-colors">
+            <Input className="w-full bg-transparent border-0 border-b border-surface-dim focus-visible:border-primary focus-visible:ring-0 px-0 py-2 rounded-none font-body-md text-body-md text-primary placeholder:text-secondary-fixed-dim transition-colors" placeholder="Email Address" type="email" />
+            <Button variant="ghost" size="icon" className="absolute right-0 top-1/2 -translate-y-1/2 text-primary hover:text-tertiary-fixed-dim transition-colors rounded-full hover:bg-transparent">
               <span className="material-symbols-outlined">arrow_forward</span>
-            </button>
+            </Button>
           </div>
         </div>
       </div>

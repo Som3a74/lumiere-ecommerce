@@ -1,12 +1,19 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/shared/ProductCard";
-import { createClient } from "@/lib/server";
+import { createClient } from "@/utils/supabase/server";
+import { FiltersClient } from "./FiltersClient";
 
-export default async function CollectionsPage() {
+export default async function CollectionsPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const supabase = await createClient();
+  const resolvedParams = await searchParams;
   
-  // Fetch products and their images
-  const { data: productsData, error } = await supabase
+  const category = typeof resolvedParams.category === 'string' ? resolvedParams.category : null;
+  const material = typeof resolvedParams.material === 'string' ? resolvedParams.material : null;
+  const sort = typeof resolvedParams.sort === 'string' ? resolvedParams.sort : 'newest';
+  const search = typeof resolvedParams.search === 'string' ? resolvedParams.search : null;
+
+  // Build the query
+  let query = supabase
     .from('products')
     .select(`
       id,
@@ -14,22 +21,69 @@ export default async function CollectionsPage() {
       description,
       price,
       category,
+      created_at,
       product_images (
         image_url
       )
     `);
 
+  if (search) {
+    query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+  }
+
+  if (category) {
+    if (category === 'Watches' || category === 'Timepieces') {
+      query = query.in('category', ['Chronograph', 'Automatic', 'Tourbillon', 'Heritage']);
+    } else if (category === 'Bags' || category === 'Leather Goods') {
+      query = query.in('category', ['Leather Goods', 'Tote']);
+    } else {
+      query = query.eq('category', category);
+    }
+  }
+
+  if (material) {
+    query = query.ilike('description', `%${material}%`);
+  }
+
+  if (sort === 'price_asc') {
+    query = query.order('price', { ascending: true });
+  } else if (sort === 'price_desc') {
+    query = query.order('price', { ascending: false });
+  } else {
+    // newest
+    query = query.order('created_at', { ascending: false });
+  }
+
+  // Fetch products
+  const { data: productsData, error } = await query;
+
   if (error) {
     console.error("Error fetching products:", error);
   }
 
+  // Fetch wishlist status
+  const { data: { user } } = await supabase.auth.getUser();
+  let userWishlist: string[] = [];
+  if (user) {
+    const { data: wishlistData } = await supabase
+      .from("wishlist_items")
+      .select("product_id")
+      .eq("user_id", user.id);
+    
+    if (wishlistData) {
+      userWishlist = wishlistData.map(item => item.product_id);
+    }
+  }
+
   // Format the data to match what the ProductCard expects
   const collectionsProducts = (productsData || []).map((product) => ({
+    productId: product.id,
     title: product.name,
     price: `$${product.price.toLocaleString()}`,
     category: product.category,
     imageUrl: product.product_images?.[0]?.image_url || "/assets/images/logo.png",
     href: `/product/${product.id}`,
+    isWishlisted: userWishlist.includes(product.id),
   }));
 
   return (
@@ -38,51 +92,43 @@ export default async function CollectionsPage() {
       <header className="mb-16 flex flex-col md:flex-row justify-between items-end gap-8">
         <div className="max-w-2xl">
           <h1 className="font-headline-lg text-headline-lg md:font-display-lg md:text-display-lg text-primary mb-4">
-            Timepieces
+            {category ? category : "Our Collection"}
           </h1>
           <p className="font-body-lg text-body-lg text-secondary">
-            Discover our collection of meticulously crafted horological masterpieces, where tradition meets contemporary elegance.
+            Discover our collection of meticulously crafted pieces, where tradition meets contemporary elegance.
           </p>
         </div>
-        <div className="w-full md:w-auto flex items-center gap-6 border-b border-surface-container pb-4">
-          <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest hidden md:block">
-            Filter:
-          </span>
-          <div className="flex gap-6 overflow-x-auto pb-2 scrollbar-hide">
-            <button className="font-body-md text-body-md text-primary flex items-center gap-2 whitespace-nowrap hover:text-secondary transition-colors">
-              Collection <span className="material-symbols-outlined text-sm">expand_more</span>
-            </button>
-            <button className="font-body-md text-body-md text-primary flex items-center gap-2 whitespace-nowrap hover:text-secondary transition-colors">
-              Material <span className="material-symbols-outlined text-sm">expand_more</span>
-            </button>
-            <button className="font-body-md text-body-md text-primary flex items-center gap-2 whitespace-nowrap hover:text-secondary transition-colors">
-              Complication <span className="material-symbols-outlined text-sm">expand_more</span>
-            </button>
-            <button className="font-body-md text-body-md text-primary flex items-center gap-2 whitespace-nowrap hover:text-secondary transition-colors">
-              Price <span className="material-symbols-outlined text-sm">expand_more</span>
-            </button>
-          </div>
-          <div className="ml-auto pl-6 border-l border-surface-container">
-            <button className="font-body-md text-body-md text-primary flex items-center gap-2 whitespace-nowrap hover:text-secondary transition-colors">
-              Sort by <span className="material-symbols-outlined text-sm">sort</span>
-            </button>
-          </div>
-        </div>
+        
+        <FiltersClient />
       </header>
 
       {/* Product Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
-        {collectionsProducts.map((product, index) => (
-          <ProductCard key={index} {...product} className={index % 4 === 1 || index % 4 === 3 ? "md:mt-12 lg:mt-0" : ""} />
-        ))}
-      </div>
+      {collectionsProducts.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+          {collectionsProducts.map((product, index) => (
+            <ProductCard 
+              key={product.productId} 
+              {...product} 
+              className={index % 4 === 1 || index % 4 === 3 ? "md:mt-12 lg:mt-0" : ""} 
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-24 bg-surface-container-low border border-surface-container">
+          <span className="material-symbols-outlined text-[48px] text-secondary mb-4">search_off</span>
+          <h3 className="font-headline-md text-primary mb-2">No products found</h3>
+          <p className="font-body-md text-secondary">We couldn't find any products matching your current filters.</p>
+        </div>
+      )}
 
       {/* Load More Action */}
-      <div className="mt-24 text-center">
-        <button className="inline-flex items-center justify-center px-12 py-4 bg-primary text-on-primary font-label-caps text-label-caps uppercase tracking-widest hover:bg-surface-tint transition-colors duration-300">
-          Load More
-        </button>
-      </div>
+      {collectionsProducts.length > 0 && (
+        <div className="mt-24 text-center">
+          <button className="inline-flex items-center justify-center px-12 py-4 bg-primary text-on-primary font-label-caps text-label-caps uppercase tracking-widest hover:bg-surface-tint transition-colors duration-300">
+            Load More
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,13 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ProductCard } from "@/components/shared/ProductCard";
+import { WishlistButton } from "@/components/shared/WishlistButton";
+import { addToCart } from "@/app/actions/cart";
+
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
 export default function ProductDetailPage({ product, relatedProducts }: { product: any, relatedProducts: any[] }) {
   const [transformOrigin, setTransformOrigin] = useState("center center");
-  const [openAccordion, setOpenAccordion] = useState<number | null>(0); // First one open by default
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const colorsList = product.colors?.length > 0 ? product.colors : ["Platinum"];
+  const sizesList = product.sizes?.length > 0 ? product.sizes : ["40mm"];
+  const featuresList = product.features?.length > 0 ? product.features : [];
+
+  // Group images by color
+  const imagesByColor = colorsList.reduce((acc: Record<string, string[]>, color: string) => {
+    // Find images that match this color, or default to all images if none specified
+    const colorImages = product.images.filter((img: any) => img.color === color).map((img: any) => img.image_url);
+    acc[color] = colorImages.length > 0 ? colorImages : product.images.map((img: any) => img.image_url);
+    if (acc[color].length === 0) acc[color] = ["/placeholder-image.jpg"];
+    return acc;
+  }, {} as Record<string, string[]>);
+
+  const [selectedColor, setSelectedColor] = useState<string>(colorsList[0]);
+  const [selectedImage, setSelectedImage] = useState<string>(imagesByColor[colorsList[0]]?.[0] || "/placeholder-image.jpg");
+  const [selectedSize, setSelectedSize] = useState<string>(sizesList[0]);
+
+  const handleColorSelect = (color: string) => {
+    setSelectedColor(color);
+    setSelectedImage(imagesByColor[color]?.[0] || "/placeholder-image.jpg");
+  };
+
+  const getColorClass = (colorName: string) => {
+    const lower = colorName.toLowerCase();
+    if (lower.includes("gold") && lower.includes("rose")) return "bg-amber-200";
+    if (lower.includes("gold")) return "bg-yellow-300";
+    if (lower.includes("carbon") || lower.includes("black")) return "bg-slate-800";
+    return "bg-zinc-200"; // Platinum/Silver default
+  };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
@@ -16,8 +54,21 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
     setTransformOrigin(`${x}% ${y}%`);
   };
 
-  const toggleAccordion = (index: number) => {
-    setOpenAccordion(openAccordion === index ? null : index);
+  const handleAddToCart = () => {
+    startTransition(async () => {
+      const result = await addToCart(product.id, { color: selectedColor, size: selectedSize });
+      if (result?.error) {
+        if (result.error.includes("logged in")) {
+          toast.error("You must be logged in to add items to your cart.");
+          router.push("/auth/login");
+        } else {
+          toast.error(result.error);
+        }
+      } else {
+        toast.success("Added to cart successfully!");
+        router.push("/cart");
+      }
+    });
   };
 
   return (
@@ -59,8 +110,12 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
         <div className="md:col-span-7 flex flex-col-reverse md:flex-row gap-6 md:sticky md:top-28 items-start h-fit">
           {/* Thumbnails */}
           <div className="flex md:flex-col gap-4 overflow-x-auto md:overflow-visible w-full md:w-24 shrink-0 no-scrollbar">
-            {product.images.map((img: string, i: number) => (
-              <button key={i} className={`w-20 h-24 md:w-24 md:h-32 shrink-0 border relative overflow-hidden group ${i === 0 ? "border-primary" : "border-transparent hover:border-surface-dim transition-colors"}`}>
+            {(imagesByColor[selectedColor] || []).map((img: string, i: number) => (
+              <button 
+                key={i} 
+                onClick={() => setSelectedImage(img)}
+                className={`w-20 h-24 md:w-24 md:h-32 shrink-0 border relative overflow-hidden group ${selectedImage === img ? "border-primary" : "border-transparent hover:border-surface-dim transition-colors"}`}
+              >
                 <img
                   alt={`Thumbnail ${i + 1}`}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -78,7 +133,7 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
               alt={product.title}
               className="w-full h-auto object-cover zoom-image"
               style={{ transformOrigin }}
-              src={product.images[0] || "/assets/images/logo.png"}
+              src={selectedImage}
             />
           </div>
         </div>
@@ -99,99 +154,98 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
           </div>
 
           {/* Variations */}
-          <div className="mb-10">
+          <div className="mb-8">
             <p className="font-label-caps text-label-caps text-primary mb-4 uppercase">
-              Material: <span className="text-secondary font-normal ml-2">Platinum &amp; Alligator</span>
+              Material: <span className="text-secondary font-normal ml-2">{selectedColor}</span>
             </p>
             <div className="flex gap-4">
-              <button aria-label="Select Platinum" className="w-10 h-10 rounded-full border-2 border-primary bg-zinc-200"></button>
-              <button aria-label="Select Rose Gold" className="w-10 h-10 rounded-full border border-surface-container bg-amber-200 hover:border-primary transition-colors"></button>
-              <button aria-label="Select Carbon" className="w-10 h-10 rounded-full border border-surface-container bg-slate-800 hover:border-primary transition-colors"></button>
+              {colorsList.map((c: string, idx: number) => (
+                <button 
+                  key={idx}
+                  onClick={() => handleColorSelect(c)}
+                  aria-label={`Select ${c}`} 
+                  className={`w-10 h-10 rounded-full border-2 ${selectedColor === c ? "border-primary" : "border-transparent hover:border-surface-dim transition-colors"} ${getColorClass(c)} shadow-sm`}
+                ></button>
+              ))}
+            </div>
+          </div>
+
+          {/* Sizes */}
+          <div className="mb-10">
+            <p className="font-label-caps text-label-caps text-primary mb-4 uppercase">
+              Size: <span className="text-secondary font-normal ml-2">{selectedSize}</span>
+            </p>
+            <div className="flex flex-wrap gap-4">
+              {sizesList.map((s: string, idx: number) => (
+                <button 
+                  key={idx}
+                  onClick={() => setSelectedSize(s)}
+                  className={`px-4 py-2 border ${selectedSize === s ? "border-primary bg-primary text-on-primary" : "border-surface-container text-primary hover:border-surface-dim"} font-label-caps text-label-caps uppercase transition-colors`}
+                >
+                  {s}
+                </button>
+              ))}
             </div>
           </div>
 
           {/* Actions */}
           <div className="flex flex-col gap-4 mb-12">
-            <Link href="/checkout" className="w-full text-center bg-primary text-on-primary font-label-caps text-label-caps uppercase py-5 border border-primary hover:bg-transparent hover:text-primary transition-all duration-300 group relative overflow-hidden">
-              <span className="relative z-10">Add to Cart</span>
-            </Link>
-            <button className="w-full bg-transparent text-primary font-label-caps text-label-caps uppercase py-5 border border-surface-container hover:border-primary transition-all duration-300 flex items-center justify-center gap-2">
-              <span className="material-symbols-outlined text-lg">favorite_border</span>
-              Add to Wishlist
-            </button>
+            <Button 
+              onClick={handleAddToCart}
+              disabled={isPending}
+              className="w-full rounded-none font-label-caps text-label-caps uppercase py-6 border border-primary hover:bg-transparent hover:text-primary transition-all duration-300 disabled:opacity-50"
+            >
+              <span className="relative z-10">{isPending ? "Adding to Cart..." : "Add to Cart"}</span>
+            </Button>
+            <WishlistButton 
+              productId={product.id} 
+              initialIsWishlisted={product.isWishlisted} 
+              withText={true} 
+            />
           </div>
 
           {/* Accordions */}
-          <div className="border-t border-surface-container border-b">
-            {/* Accordion Item 1 */}
-            <div className="border-b border-surface-container last:border-b-0">
-              <button
-                aria-expanded={openAccordion === 0}
-                className="w-full flex justify-between items-center py-6 focus:outline-none"
-                onClick={() => toggleAccordion(0)}
-              >
-                <span className="font-label-caps text-label-caps text-primary uppercase">Product Description</span>
-                <span className={`material-symbols-outlined text-primary transition-transform duration-300 ${openAccordion === 0 ? "rotate-180" : ""}`}>
-                  expand_more
-                </span>
-              </button>
-              <div
-                className="overflow-hidden transition-all duration-300"
-                style={{ maxHeight: openAccordion === 0 ? "500px" : "0px" }}
-              >
-                <div className="pb-6 font-body-md text-body-md text-secondary leading-relaxed">
-                  Engineered in Geneva, the Chronographe Éternel features a hand-wound mechanical movement visible through a sapphire crystal case back. The dial is enameled using traditional Grand Feu techniques, ensuring a brilliance that will not fade over time. The case measures a subtle 38mm, ideal for understated elegance.
-                </div>
-              </div>
-            </div>
+          <Accordion type="single" collapsible defaultValue="item-1" className="w-full border-t border-b border-surface-container">
+            <AccordionItem value="item-1" className="border-b border-surface-container last:border-b-0">
+              <AccordionTrigger className="font-label-caps text-label-caps text-primary uppercase py-6 hover:no-underline">
+                Product Description
+              </AccordionTrigger>
+              <AccordionContent className="pb-6 font-body-md text-body-md text-secondary leading-relaxed">
+                Engineered in Geneva, the Chronographe Éternel features a hand-wound mechanical movement visible through a sapphire crystal case back. The dial is enameled using traditional Grand Feu techniques, ensuring a brilliance that will not fade over time. The case measures a subtle 38mm, ideal for understated elegance.
+              </AccordionContent>
+            </AccordionItem>
+            
+            <AccordionItem value="item-2" className="border-b border-surface-container last:border-b-0">
+              <AccordionTrigger className="font-label-caps text-label-caps text-primary uppercase py-6 hover:no-underline">
+                Features & Materials
+              </AccordionTrigger>
+              <AccordionContent className="pb-6 font-body-md text-body-md text-secondary leading-relaxed">
+                {featuresList.length > 0 ? (
+                  <ul className="list-disc pl-4 space-y-2 mb-4">
+                    {featuresList.map((f: string, i: number) => (
+                      <li key={i}>{f}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <>
+                    Case: 950 Platinum.<br />
+                    Strap: Hand-stitched Louisiana Alligator.<br />
+                    Crystal: Anti-reflective Sapphire.<br /><br />
+                  </>
+                )}
+                To maintain the brilliance of your timepiece, avoid extreme temperature changes and magnetic fields. We recommend a full servicing every 5 years by an authorized LUMIÈRE horologist.
+              </AccordionContent>
+            </AccordionItem>
 
-            {/* Accordion Item 2 */}
-            <div className="border-b border-surface-container last:border-b-0">
-              <button
-                aria-expanded={openAccordion === 1}
-                className="w-full flex justify-between items-center py-6 focus:outline-none"
-                onClick={() => toggleAccordion(1)}
-              >
-                <span className="font-label-caps text-label-caps text-primary uppercase">Materials &amp; Care</span>
-                <span className={`material-symbols-outlined text-primary transition-transform duration-300 ${openAccordion === 1 ? "rotate-180" : ""}`}>
-                  expand_more
-                </span>
-              </button>
-              <div
-                className="overflow-hidden transition-all duration-300"
-                style={{ maxHeight: openAccordion === 1 ? "500px" : "0px" }}
-              >
-                <div className="pb-6 font-body-md text-body-md text-secondary leading-relaxed">
-                  Case: 950 Platinum.<br />
-                  Strap: Hand-stitched Louisiana Alligator.<br />
-                  Crystal: Anti-reflective Sapphire.<br /><br />
-                  To maintain the brilliance of your timepiece, avoid extreme temperature changes and magnetic fields. We recommend a full servicing every 5 years by an authorized LUMIÈRE horologist.
-                </div>
-              </div>
-            </div>
-
-            {/* Accordion Item 3 */}
-            <div className="border-b border-surface-container last:border-b-0">
-              <button
-                aria-expanded={openAccordion === 2}
-                className="w-full flex justify-between items-center py-6 focus:outline-none"
-                onClick={() => toggleAccordion(2)}
-              >
-                <span className="font-label-caps text-label-caps text-primary uppercase">Shipping &amp; Returns</span>
-                <span className={`material-symbols-outlined text-primary transition-transform duration-300 ${openAccordion === 2 ? "rotate-180" : ""}`}>
-                  expand_more
-                </span>
-              </button>
-              <div
-                className="overflow-hidden transition-all duration-300"
-                style={{ maxHeight: openAccordion === 2 ? "500px" : "0px" }}
-              >
-                <div className="pb-6 font-body-md text-body-md text-secondary leading-relaxed">
-                  Complimentary secure global delivery via specialized courier within 3-5 business days. All shipments are fully insured. Returns are accepted within 14 days of receipt, provided the timepiece remains unworn and in its original packaging with all protective seals intact.
-                </div>
-              </div>
-            </div>
-          </div>
+            <AccordionItem value="item-3" className="border-b border-surface-container last:border-b-0">
+              <AccordionTrigger className="font-label-caps text-label-caps text-primary uppercase py-6 hover:no-underline">
+                Shipping &amp; Returns
+              </AccordionTrigger>
+              <AccordionContent className="pb-6 font-body-md text-body-md text-secondary leading-relaxed">
+                Complimentary secure global delivery via specialized courier within 3-5 business days. All shipments are fully insured. Returns are accepted within 14 days of receipt, provided the timepiece remains unworn and in its original packaging with all protective seals intact.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </section>
 
@@ -202,10 +256,12 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
           {relatedProducts.map((p, i) => (
             <ProductCard
               key={p.id}
+              productId={p.id}
               title={p.title}
               price={p.price}
               imageUrl={p.imageUrl}
               href={`/product/${p.id}`}
+              isWishlisted={p.isWishlisted}
               className={i === 2 ? "hidden md:block" : "block"}
             />
           ))}

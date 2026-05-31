@@ -4,11 +4,12 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { createClient } from "@/lib/server";
+import { createClient } from "@/utils/supabase/server";
+import { Toaster } from "@/components/ui/sonner";
 
-const playfairDisplayHeading = Playfair_Display({subsets:['latin'],variable:'--font-heading'});
+const playfairDisplayHeading = Playfair_Display({ subsets: ['latin'], variable: '--font-heading' });
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
   title: "LUMIÈRE GENÈVE - Homepage",
@@ -22,7 +23,7 @@ export default async function RootLayout({
 }>) {
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
-  
+
   return (
     <html
       lang="en"
@@ -32,6 +33,7 @@ export default async function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
       <body className="min-h-full flex flex-col bg-background text-on-background">
+        <Toaster position="top-center" />
         <Header user={data?.user} />
         <main className="flex-1 mt-24">{children}</main>
         <Footer />

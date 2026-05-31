@@ -1,22 +1,15 @@
 import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
-import CheckoutClient from "./CheckoutClient";
+import CartClient from "./CartClient";
 
-export default async function CheckoutPage() {
+export default async function CartPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  // If not logged in, we'll just show an empty cart for now
+  // A robust implementation might check local storage, but since we rely on DB:
   if (!user) {
-    redirect("/auth/login");
+    return <CartClient cartItems={[]} totals={{ subtotal: 0, tax: 0, total: 0 }} />;
   }
-
-  // Extract user profile data
-  const userProfile = {
-    firstName: user?.user_metadata?.first_name || "",
-    lastName: user?.user_metadata?.last_name || "",
-    email: user?.email || "",
-    phone: user?.user_metadata?.phone || "",
-  };
 
   // Fetch cart items
   const { data: cartItems, error } = await supabase
@@ -24,6 +17,8 @@ export default async function CheckoutPage() {
     .select(`
       id,
       quantity,
+      color,
+      size,
       product:products (
         id,
         name,
@@ -44,8 +39,6 @@ export default async function CheckoutPage() {
 
   // Calculate Totals
   const subtotal = items.reduce((sum, item) => {
-    // Note: product structure depending on foreign key setup might be an array if not a single relation,
-    // but typically it's an object if it's a many-to-one relation.
     const productData = Array.isArray(item.product) ? item.product[0] : item.product;
     const price = productData?.price || 0;
     return sum + (price * item.quantity);
@@ -61,5 +54,5 @@ export default async function CheckoutPage() {
     total,
   };
 
-  return <CheckoutClient userProfile={userProfile} cartItems={items} totals={totals} />;
+  return <CartClient cartItems={items} totals={totals} />;
 }
