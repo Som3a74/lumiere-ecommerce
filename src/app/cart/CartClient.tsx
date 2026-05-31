@@ -115,7 +115,7 @@ export default function CartClient({ cartItems, totals }: CartClientProps) {
                       disabled={isPending && pendingAction?.id === item.id}
                       className="px-0 font-label-caps text-label-caps text-secondary hover:text-error underline underline-offset-4 transition-colors uppercase tracking-widest disabled:opacity-50"
                     >
-                      {isPending && pendingAction?.id === item.id && pendingAction.type === 'remove' ? "Removing..." : "Remove"}
+                      {isPending && pendingAction?.id === item.id && pendingAction?.type === 'remove' ? "Removing..." : "Remove"}
                     </Button>
                   </div>
                 </div>
