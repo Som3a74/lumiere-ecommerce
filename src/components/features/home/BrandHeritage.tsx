@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export function BrandHeritage() {
   return (
     <section className="py-section-gap px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
@@ -13,12 +15,13 @@ export function BrandHeritage() {
           <a className="luxury-button font-label-caps text-label-caps text-primary uppercase tracking-widest py-2" href="#">Discover Our Heritage</a>
         </div>
         <div className="order-1 md:order-2 h-[600px] bg-surface-container relative overflow-hidden fade-in-section group">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img 
-            alt="Craftsmanship" 
-            className="w-full h-full object-cover transition-transform duration-[2s] ease-out group-hover:scale-110" 
+          <Image
+            width={1920}
+            height={1080}
+            alt="Craftsmanship"
+            className="w-full h-full object-cover transition-transform duration-[2s] ease-out group-hover:scale-110"
             style={{ transformOrigin: "center center" }}
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYDV4_sqSRkqMH9_1EwTAAamKam78FkBG1qnZYOsmURe959OjNnsCqI9y_Pgd_QL6e3FNSJy9qwp1TxbTyRHmmFD-YdEcbD4eoOAd6g0ff5lNPkezsauLoU589OHg8hV7qB2V4yJTGW5kYDJZSvFFfHCBx8DBtBMAvfnJC7kRMrdQcdTxa4b6s-MECq3nns1MotcgZj_tTARCvO2kCVRmzhjRB1gJEdUVnORnyKzQ_wzBinCgbkPgJBKzomTLsJNjARW0-YzjuInbf" 
+            src="/assets/images/home/A Legacy of Light.png"
           />
         </div>
       </div>

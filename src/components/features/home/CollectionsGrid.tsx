@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 
 export function CollectionsGrid() {
@@ -12,10 +13,12 @@ export function CollectionsGrid() {
         <div className="md:col-span-7 relative group overflow-hidden fade-in-section">
           <div className="aspect-[4/5] bg-surface-container w-full h-full">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              alt="Luxury Timepiece" 
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1Z9ODRMhN0lG8DZb1UAqip6g81q5HV5A_FvnOSnBEtGPkpVbEfXqvY7SbTbDDvbrbiwz9ql3SJ8slCz-RsQU8Q5LTN61DjLqT0-RBEb-6LzPJ_9Jn4xqY0d01cZt5_F2HSbGaz3dUg3ds-kG2JccQXk0npIXeOwp40qAj5qpNixgQAgJEfpVy2BSNRVgt_aPCly3tfSY97Pgya9FkF7m91_qYnQpSU3q1pKRgHdQIAmy2UJKZuNyBd-GzeRlTUZfodblejmZJcVY4" 
+            <Image
+              width={1920}
+              height={1080}
+              alt="Luxury Timepiece"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              src="/assets/images/home/Timepieces.png"
             />
           </div>
           <div className="absolute inset-0 bg-black/10 transition-opacity duration-300 group-hover:bg-black/20"></div>
@@ -24,16 +27,18 @@ export function CollectionsGrid() {
             <Link className="font-label-caps text-label-caps uppercase tracking-widest border-b border-surface-bright pb-1 hover:border-tertiary-fixed-dim hover:text-tertiary-fixed-dim transition-colors" href="/collections">Explore</Link>
           </div>
         </div>
-        
+
         {/* Smaller Images Right */}
         <div className="md:col-span-5 flex flex-col gap-gutter">
           <div className="relative group overflow-hidden flex-1 fade-in-section" style={{ transitionDelay: "100ms" }}>
             <div className="bg-surface-container w-full h-full min-h-[300px]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                alt="Leather Goods" 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcpLPZZUUGLoo-YfrX2PIqEsofv440XnvqtJBpMY6w1-mwoAyzGZha-d9P734Cg1RMo-4JN9UV0P0seK0jPxRhdSGt2vQ5yWv3Axr0h4Ocsdp52svnBgyq1MaRGE9JWDsis1NYsF9AqzHPwpOgQ1Ok_P_rBvJVHqZmrQWTx_juz7_swFKg90yZ8hzt9e-dTaJwfQaYPR4gcsdjis_EZF44Ssy2bEjBYRNjebQ0TS76Jj0PFOVgp9ST_Ajv-g_6C2CpkUZyDMVCosq8" 
+              <Image
+                width={1920}
+                height={1080}
+                alt="Leather Goods"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                src="/assets/images/home/Leather Goods.png"
               />
             </div>
             <div className="absolute inset-0 bg-black/10 transition-opacity duration-300 group-hover:bg-black/20"></div>
@@ -42,7 +47,7 @@ export function CollectionsGrid() {
               <Link className="font-label-caps text-label-caps uppercase tracking-widest border-b border-surface-bright pb-1 hover:border-tertiary-fixed-dim hover:text-tertiary-fixed-dim transition-colors" href="#">Explore</Link>
             </div>
           </div>
-          
+
           <div className="bg-surface-bright p-8 border border-surface-container flex flex-col justify-center items-center text-center fade-in-section" style={{ transitionDelay: "200ms" }}>
             <span className="material-symbols-outlined text-4xl text-tertiary-fixed-dim mb-4" style={{ fontVariationSettings: "'wght' 200" }}>diamond</span>
             <h3 className="font-headline-md text-headline-md text-primary mb-3">Bespoke Services</h3>

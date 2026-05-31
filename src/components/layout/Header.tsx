@@ -20,7 +20,8 @@ export function Header({ user }: { user?: any }) {
 
   // Close mobile menu when pathname changes
   useEffect(() => {
-    setIsMobileMenuOpen(false);
+    const timer = setTimeout(() => setIsMobileMenuOpen(false), 0);
+    return () => clearTimeout(timer);
   }, [pathname]);
 
   // Prevent scrolling when mobile menu is open

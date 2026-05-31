@@ -48,7 +48,7 @@ export default function RegisterPage() {
           <Input type="email" name="email" placeholder="EMAIL ADDRESS" required />
           <Input type="password" name="password" placeholder="PASSWORD" required />
 
-          <Button type="submit" className="w-full text-surface mt-4" disabled={isPending}>
+          <Button type="submit" variant="default" size="lg" className="w-full rounded-none uppercase text-on-primary mt-4" disabled={isPending}>
             {isPending ? "Creating Account..." : "Register"}
           </Button>
         </form>

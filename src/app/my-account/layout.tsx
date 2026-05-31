@@ -1,5 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
-import { MyAccountSidebar } from "./MyAccountSidebar";
+import { MyAccountSidebar } from "@/components/layout/MyAccountSidebar";
 
 export default async function MyAccountLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();

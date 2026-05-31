@@ -71,9 +71,12 @@ export default async function MyAccountPage() {
                     </td>
                     <td className="py-6 px-2 text-right text-primary">${Number(order.total_amount).toLocaleString()}</td>
                     <td className="py-6 px-2 text-right">
-                      <button className="font-label-caps text-label-caps text-secondary hover:text-primary underline underline-offset-4 transition-colors">
+                      <Link 
+                        href={`/my-account/orders/${order.id}`}
+                        className="font-label-caps text-label-caps text-secondary hover:text-primary underline underline-offset-4 transition-colors"
+                      >
                         View Details
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))}

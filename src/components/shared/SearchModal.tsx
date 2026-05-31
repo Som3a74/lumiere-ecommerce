@@ -13,11 +13,18 @@ import {
   CommandSeparator,
 } from "@/components/ui/command";
 
+interface SearchProduct {
+  id: string;
+  name: string;
+  price: number;
+  product_images: { image_url: string }[];
+}
+
 export function SearchModal() {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [results, setResults] = useState<any[]>([]);
-  const [defaultProducts, setDefaultProducts] = useState<any[]>([]);
+  const [results, setResults] = useState<SearchProduct[]>([]);
+  const [defaultProducts, setDefaultProducts] = useState<SearchProduct[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -56,8 +63,8 @@ export function SearchModal() {
   // Debounced search
   useEffect(() => {
     if (!searchQuery.trim()) {
-      setResults([]);
-      return;
+      const timer = setTimeout(() => setResults([]), 0);
+      return () => clearTimeout(timer);
     }
 
     const timer = setTimeout(async () => {
@@ -98,29 +105,29 @@ export function SearchModal() {
 
   return (
     <>
-      <button 
-        aria-label="Search" 
+      <button
+        aria-label="Search"
         className="text-primary hover:text-secondary transition-colors duration-300 flex items-center justify-center gap-2"
         onClick={() => setOpen(true)}
       >
         <span className="material-symbols-outlined !text-[20px]" style={{ fontVariationSettings: "'wght' 300" }}>
           search
         </span>
-        <span className="hidden md:inline-flex text-xs text-secondary border border-surface-container rounded-sm px-1.5 py-0.5 bg-surface-bright font-body-sm tracking-widest uppercase">
+        {/* <span className="hidden md:inline-flex text-xs text-secondary border border-surface-container rounded-sm px-1.5 py-0.5 bg-surface-bright font-body-sm tracking-widest uppercase">
           ⌘K
-        </span>
+        </span> */}
       </button>
 
       <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={false}>
-        <CommandInput 
-          placeholder="Search products, collections, or pages..." 
+        <CommandInput
+          placeholder="Search products, collections, or pages..."
           value={searchQuery}
           onValueChange={setSearchQuery}
         />
         <CommandList className="max-h-[500px]">
           {isSearching && <CommandEmpty>Searching...</CommandEmpty>}
           {!isSearching && results.length === 0 && searchQuery && (
-            <CommandEmpty>No results found for "{searchQuery}".</CommandEmpty>
+            <CommandEmpty>No results found for &quot;{searchQuery}&quot;.</CommandEmpty>
           )}
 
 
@@ -174,7 +181,7 @@ export function SearchModal() {
               ))}
             </CommandGroup>
           )}
-          
+
           <CommandSeparator />
         </CommandList>
       </CommandDialog>

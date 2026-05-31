@@ -6,6 +6,8 @@ import { FloatingInput } from "@/components/ui/floating-input";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { placeOrder } from "@/app/actions/checkout";
+import { useRouter } from "next/navigation";
 
 interface CheckoutClientProps {
   userProfile: {
@@ -23,7 +25,9 @@ interface CheckoutClientProps {
 }
 
 export default function CheckoutClient({ userProfile, cartItems, totals }: CheckoutClientProps) {
+  const router = useRouter();
   const [openAccordion, setOpenAccordion] = useState<string>("contact-info");
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   const [formData, setFormData] = useState({
     email: userProfile.email || "",
@@ -54,13 +58,43 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
     setOpenAccordion(id);
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!isFormValid) {
       toast.error("Please fill in all contact, shipping, and payment information before placing your order.");
       return;
     }
-    // Placeholder action for placing an order
-    toast.success("Order placed successfully! We will email you the receipt.");
+    
+    setIsPlacingOrder(true);
+    
+    const contactInfo = {
+      email: formData.email,
+      phone: formData.phone,
+      firstName: formData.fname,
+      lastName: formData.lname,
+    };
+    
+    const shippingAddress = {
+      address: formData.address,
+      city: formData.city,
+      country: formData.country,
+      zip: formData.zip,
+    };
+    
+    const paymentInfo = {
+      card: formData.card.slice(-4), // Only store last 4 digits mock
+      exp: formData.exp,
+    };
+
+    const result = await placeOrder(cartItems, totals, contactInfo, shippingAddress, paymentInfo);
+    
+    setIsPlacingOrder(false);
+    
+    if (result.success) {
+      toast.success(result.message);
+      router.push("/my-account");
+    } else {
+      toast.error(result.message);
+    }
   };
 
   return (
@@ -84,7 +118,9 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
               </div>
               <div className="flex justify-end">
                 <Button
-                  className="rounded-none px-8 py-6 font-label-caps text-label-caps uppercase tracking-widest hover:bg-tertiary-fixed-dim hover:text-primary transition-colors"
+                  variant="default"
+                  size="lg"
+                  className="rounded-none uppercase text-on-primary"
                   onClick={() => nextStep("shipping-address")}
                 >
                   Continue to Shipping
@@ -111,7 +147,9 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
               </div>
               <div className="flex justify-end">
                 <Button
-                  className="rounded-none px-8 py-6 font-label-caps text-label-caps uppercase tracking-widest hover:bg-tertiary-fixed-dim hover:text-primary transition-colors"
+                  variant="default"
+                  size="lg"
+                  className="rounded-none uppercase text-on-primary"
                   onClick={() => nextStep("payment-method")}
                 >
                   Continue to Payment
@@ -197,12 +235,16 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
           </div>
           {/* CTA */}
           <Button
-            className="w-full rounded-none py-6 font-label-caps text-label-caps uppercase tracking-widest flex justify-center items-center gap-2 transition-colors disabled:opacity-50"
-            disabled={cartItems.length === 0}
+            variant="default"
+            size="lg"
+            className="w-full rounded-none uppercase text-on-primary flex justify-center items-center gap-2"
+            disabled={cartItems.length === 0 || isPlacingOrder}
             onClick={handlePlaceOrder}
           >
-            <span className="text-surface material-symbols-outlined text-[18px]">lock</span>
-            Place Secure Order
+            <span className="text-surface material-symbols-outlined text-[18px]">
+              {isPlacingOrder ? "hourglass_empty" : "lock"}
+            </span>
+            {isPlacingOrder ? "Placing Order..." : "Place Secure Order"}
           </Button>
         </div>
       </div>

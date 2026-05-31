@@ -18,6 +18,8 @@
   --color-on-error: #ffffff;
   --color-surface-tint: #5f5e5e;
   --color-surface-dim: #dadada;
+  --color-surface-cream: #fdfbf7;
+  --color-gold-accent: #d4af37;
   --color-on-secondary-container: #636360;
   --color-on-tertiary-fixed-variant: #574500;
   --color-error-container: #ffdad6;
@@ -51,7 +53,7 @@
   --color-surface-container-low: #f3f3f4;
   --color-on-surface: #1a1c1c;
   --color-tertiary-fixed: #ffe088;
-  
+
   --spacing-container-max: 1440px;
   --spacing-margin-tablet: 40px;
   --spacing-margin-desktop: 80px;
@@ -59,7 +61,7 @@
   --spacing-section-gap: 128px;
   --spacing-gutter: 32px;
   --spacing-margin-mobile: 20px;
-  
+
   --font-display-lg: var(--font-heading);
   --font-body-md: var(--font-sans);
   --font-headline-md: var(--font-heading);
@@ -71,23 +73,23 @@
   --text-display-lg: 64px;
   --text-display-lg--line-height: 72px;
   --text-display-lg--letter-spacing: -0.02em;
-  
+
   --text-body-md: 16px;
   --text-body-md--line-height: 24px;
-  
+
   --text-headline-md: 24px;
   --text-headline-md--line-height: 32px;
-  
+
   --text-body-lg: 18px;
   --text-body-lg--line-height: 28px;
-  
+
   --text-display-lg-mobile: 40px;
   --text-display-lg-mobile--line-height: 48px;
   --text-display-lg-mobile--letter-spacing: -0.01em;
-  
+
   --text-headline-lg: 32px;
   --text-headline-lg--line-height: 40px;
-  
+
   --text-label-caps: 12px;
   --text-label-caps--line-height: 16px;
   --text-label-caps--letter-spacing: 0.1em;
@@ -100,7 +102,8 @@
   body {
     @apply bg-background text-on-background font-body-md text-body-md antialiased selection:bg-surface-dim selection:text-primary;
   }
-  button:not(:disabled), [role="button"]:not(:disabled) {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
     cursor: pointer;
   }
 }
@@ -110,7 +113,9 @@
     opacity: 0;
     transform: translateY(20px);
     visibility: hidden;
-    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    transition:
+      opacity 0.8s ease-out,
+      transform 0.8s ease-out;
     will-change: opacity, visibility;
   }
   .fade-in-section.is-visible {
@@ -118,13 +123,13 @@
     transform: none;
     visibility: visible;
   }
-  
+
   .luxury-button {
     position: relative;
     overflow: hidden;
   }
   .luxury-button::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: 0;
     left: 0;

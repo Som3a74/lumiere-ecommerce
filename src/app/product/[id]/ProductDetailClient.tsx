@@ -191,9 +191,11 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
           {/* Actions */}
           <div className="flex flex-col gap-4 mb-12">
             <Button 
+              variant="default"
+              size="lg"
               onClick={handleAddToCart}
               disabled={isPending}
-              className="w-full rounded-none font-label-caps text-label-caps uppercase py-6 border border-primary hover:bg-transparent hover:text-primary transition-all duration-300 disabled:opacity-50"
+              className="w-full rounded-none uppercase text-on-primary"
             >
               <span className="relative z-10">{isPending ? "Adding to Cart..." : "Add to Cart"}</span>
             </Button>

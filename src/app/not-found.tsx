@@ -16,10 +16,7 @@ export default function NotFound() {
           Discover our latest collections or return to the homepage.
         </p>
         <div className="pt-8">
-          <Button 
-            asChild
-            className="rounded-none px-12 py-6 font-label-caps text-label-caps uppercase tracking-widest border border-primary hover:bg-transparent hover:text-primary transition-colors"
-          >
+          <Button asChild variant="default" size="lg" className="rounded-none uppercase text-on-primary">
             <Link href="/">Return to Homepage</Link>
           </Button>
         </div>

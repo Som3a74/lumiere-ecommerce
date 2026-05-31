@@ -1,0 +1,52 @@
+interface ShippingInfoCardProps {
+  contactInfo: {
+    email: string;
+    phone: string;
+    firstName: string;
+    lastName: string;
+  };
+  shippingAddress: {
+    address: string;
+    city: string;
+    country: string;
+    zip: string;
+  };
+}
+
+export function ShippingInfoCard({ contactInfo, shippingAddress }: ShippingInfoCardProps) {
+  if (!contactInfo && !shippingAddress) {
+    return null; // Handle older orders without JSON data gracefully
+  }
+
+  return (
+    <div className="bg-surface p-6 md:p-8 rounded-DEFAULT border border-surface-container mt-8">
+      <h2 className="font-headline-md text-headline-md text-primary mb-6 border-b border-surface-container pb-4">
+        Shipping Information
+      </h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <h3 className="font-label-caps text-label-caps text-secondary uppercase tracking-widest mb-4">
+            Contact
+          </h3>
+          <div className="space-y-1 font-body-md text-primary">
+            <p>{contactInfo?.firstName} {contactInfo?.lastName}</p>
+            <p>{contactInfo?.email}</p>
+            <p>{contactInfo?.phone}</p>
+          </div>
+        </div>
+        
+        <div>
+          <h3 className="font-label-caps text-label-caps text-secondary uppercase tracking-widest mb-4">
+            Address
+          </h3>
+          <div className="space-y-1 font-body-md text-primary">
+            <p>{shippingAddress?.address}</p>
+            <p>{shippingAddress?.city}, {shippingAddress?.zip}</p>
+            <p>{shippingAddress?.country}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

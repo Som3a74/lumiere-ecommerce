@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 export function FiltersClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const currentCategory = searchParams.get("category") || "";
   const currentMaterial = searchParams.get("material") || "";
   const currentSort = searchParams.get("sort") || "newest";
@@ -57,7 +57,7 @@ export function FiltersClient() {
 
   const materials = [
     { label: "All Materials", value: "" },
-    { label: "Leather (جلد)", value: "leather" },
+    { label: "Leather", value: "leather" },
     { label: "Gold", value: "gold" },
     { label: "Steel", value: "steel" },
     { label: "Platinum", value: "platinum" },
@@ -75,18 +75,18 @@ export function FiltersClient() {
       <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest hidden md:block">
         Filter:
       </span>
-      
+
       <div className="flex gap-6 flex-wrap pb-2 flex-grow">
         {/* Category Dropdown */}
         <div className="relative">
-          <Button 
+          <Button
             variant="ghost"
             onClick={() => toggleDropdown("category")}
             className="font-body-md text-body-md text-primary flex items-center gap-2 whitespace-nowrap hover:text-secondary transition-colors hover:bg-transparent px-0"
           >
             {categories.find(c => c.value === currentCategory)?.label || "Collection"} <span className="material-symbols-outlined text-sm">{openDropdown === "category" ? "expand_less" : "expand_more"}</span>
           </Button>
-          
+
           {openDropdown === "category" && (
             <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-surface-container shadow-lg z-50 py-2">
               {categories.map((cat) => (
@@ -105,14 +105,14 @@ export function FiltersClient() {
 
         {/* Material Dropdown */}
         <div className="relative">
-          <Button 
+          <Button
             variant="ghost"
             onClick={() => toggleDropdown("material")}
             className="font-body-md text-body-md text-primary flex items-center gap-2 whitespace-nowrap hover:text-secondary transition-colors hover:bg-transparent px-0"
           >
             {materials.find(m => m.value === currentMaterial)?.label || "Material"} <span className="material-symbols-outlined text-sm">{openDropdown === "material" ? "expand_less" : "expand_more"}</span>
           </Button>
-          
+
           {openDropdown === "material" && (
             <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-surface-container shadow-lg z-50 py-2">
               {materials.map((mat) => (
@@ -129,17 +129,17 @@ export function FiltersClient() {
           )}
         </div>
       </div>
-      
+
       {/* Sort Dropdown */}
       <div className="ml-auto pl-6 border-l border-surface-container relative">
-        <Button 
+        <Button
           variant="ghost"
           onClick={() => toggleDropdown("sort")}
           className="font-body-md text-body-md text-primary flex items-center gap-2 whitespace-nowrap hover:text-secondary transition-colors hover:bg-transparent px-0"
         >
           {sortOptions.find(o => o.value === currentSort)?.label || "Sort by"} <span className="material-symbols-outlined text-sm">sort</span>
         </Button>
-        
+
         {openDropdown === "sort" && (
           <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-surface-container shadow-lg z-50 py-2">
             {sortOptions.map((opt) => (

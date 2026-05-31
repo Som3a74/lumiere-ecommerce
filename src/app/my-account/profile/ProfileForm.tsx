@@ -41,19 +41,22 @@ export function ProfileForm({ user }: { user: any }) {
       
       <FloatingInput id="address" name="address" label="Address" defaultValue={address} />
 
-      <div className="flex gap-4">
+      <div className="pt-8 mt-8 border-t border-surface-container">
+        <h3 className="font-headline-md text-[18px] text-primary mb-6">Change Password (Optional)</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FloatingInput id="password" name="password" label="New Password" type="password" />
+          <FloatingInput id="confirmPassword" name="confirmPassword" label="Confirm New Password" type="password" />
+        </div>
+        <p className="font-body-sm text-secondary mt-2">Leave blank if you do not wish to change your password.</p>
+      </div>
+
+      <div className="flex gap-4 pt-4">
         <button
           type="submit"
           disabled={isPending}
           className="bg-primary text-on-primary px-8 py-3 font-label-caps text-label-caps uppercase tracking-widest hover:bg-tertiary-fixed-dim hover:text-primary transition-colors disabled:opacity-50"
         >
           {isPending ? "Saving..." : "Save Changes"}
-        </button>
-        <button
-          type="button"
-          className="border border-primary text-primary px-8 py-3 font-label-caps text-label-caps uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-colors"
-        >
-          Change Password
         </button>
       </div>
     </form>
