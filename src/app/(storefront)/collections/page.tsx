@@ -25,7 +25,8 @@ export default async function CollectionsPage({ searchParams }: { searchParams: 
       product_images (
         image_url
       )
-    `);
+    `)
+    .is("deleted_at", null);
 
   if (search) {
     query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);

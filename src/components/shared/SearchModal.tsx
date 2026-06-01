@@ -51,6 +51,7 @@ export function SearchModal() {
             price, 
             product_images(image_url)
           `)
+          .is("deleted_at", null)
           .limit(4);
         if (data) {
           setDefaultProducts(data);
@@ -77,6 +78,7 @@ export function SearchModal() {
           price, 
           product_images(image_url)
         `)
+        .is("deleted_at", null)
         .or(`name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
         .limit(5);
 

@@ -36,6 +36,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       )
     `)
     .eq("id", resolvedParams.id)
+    .is("deleted_at", null)
     .single();
 
   if (productError || !product) {
@@ -54,6 +55,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       )
     `)
     .neq("id", resolvedParams.id)
+    .is("deleted_at", null)
     .limit(3);
 
   const { data: { user } } = await supabase.auth.getUser();

@@ -22,6 +22,7 @@ export async function ProductCarousel({ type, title }: ProductCarouselProps) {
         image_url
       )
     `)
+    .is('deleted_at', null)
     .limit(8);
 
   if (type === "newly-added") {
