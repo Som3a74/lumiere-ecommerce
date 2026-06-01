@@ -1,6 +1,11 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import CheckoutClient from "./CheckoutClient";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+  apiVersion: "2023-10-16" as any,
+});
 
 export default async function CheckoutPage() {
   const supabase = await createClient();
@@ -62,5 +67,27 @@ export default async function CheckoutPage() {
     total,
   };
 
-  return <CheckoutClient userProfile={userProfile} cartItems={items} totals={totals} />;
+  // Create Stripe Payment Intent
+  const amountInCents = Math.round(total * 100);
+  let clientSecret = "";
+
+  if (amountInCents > 0) {
+    try {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amountInCents,
+        currency: "usd",
+        automatic_payment_methods: {
+          enabled: true,
+        },
+        metadata: {
+          userId: user.id,
+        },
+      });
+      clientSecret = paymentIntent.client_secret || "";
+    } catch (error) {
+      console.error("Error creating PaymentIntent:", error);
+    }
+  }
+
+  return <CheckoutClient userProfile={userProfile} cartItems={items} totals={totals} clientSecret={clientSecret} />;
 }

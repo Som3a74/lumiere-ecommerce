@@ -11,6 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { placeOrder } from "@/app/actions/checkout";
 import { useRouter } from "next/navigation";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+
+// Initialize Stripe outside of component to avoid recreating the object on every render
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string);
 
 interface CheckoutClientProps {
   userProfile: {
@@ -25,15 +30,20 @@ interface CheckoutClientProps {
     tax: number;
     total: number;
   };
+  clientSecret: string;
 }
 
-export default function CheckoutClient({ userProfile, cartItems, totals }: CheckoutClientProps) {
+function CheckoutForm({ userProfile, cartItems, totals }: Omit<CheckoutClientProps, "clientSecret">) {
   const router = useRouter();
+  const stripe = useStripe();
+  const elements = useElements();
+  
   const [openAccordion, setOpenAccordion] = useState<string>("contact-info");
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<CheckoutInput>({
-    resolver: zodResolver(checkoutSchema),
+  // Omit card, exp, cvc from schema validation since Stripe Elements handles them
+  const formOptions = {
+    resolver: zodResolver(checkoutSchema.omit({ card: true, exp: true, cvc: true })),
     defaultValues: {
       email: userProfile.email || "",
       phone: userProfile.phone || "",
@@ -43,17 +53,20 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
       city: "",
       country: "",
       zip: "",
-      card: "",
-      exp: "",
-      cvc: ""
     }
-  });
+  };
+  
+  const { register, handleSubmit, formState: { errors } } = useForm(formOptions);
 
   const nextStep = (id: string) => {
     setOpenAccordion(id);
   };
 
-  const onSubmit = async (data: CheckoutInput) => {
+  const onSubmit = async (data: any) => {
+    if (!stripe || !elements) {
+      return;
+    }
+
     setIsPlacingOrder(true);
     
     const contactInfo = {
@@ -70,20 +83,55 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
       zip: data.zip,
     };
     
-    const paymentInfo = {
-      card: data.card.slice(-4), // Only store last 4 digits mock
-      exp: data.exp,
-    };
+    // 1. Confirm Payment with Stripe
+    const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: `${window.location.origin}/checkout/success`,
+        payment_method_data: {
+          billing_details: {
+            name: `${data.fname} ${data.lname}`,
+            email: data.email,
+            phone: data.phone,
+            address: {
+              line1: data.address,
+              city: data.city,
+              country: data.country && data.country.trim().length === 2 ? data.country.trim().toUpperCase() : 'US',
+              postal_code: data.zip,
+            }
+          }
+        }
+      },
+      redirect: "if_required", // We will handle the redirect manually if it succeeds immediately
+    });
 
-    const result = await placeOrder(cartItems, totals, contactInfo, shippingAddress, paymentInfo);
-    
-    setIsPlacingOrder(false);
-    
-    if (result.success) {
-      toast.success(result.message);
-      router.push("/my-account");
+    if (stripeError) {
+      toast.error(stripeError.message || "An error occurred during payment.");
+      setIsPlacingOrder(false);
+      return;
+    }
+
+    if (paymentIntent && paymentIntent.status === "succeeded") {
+      // 2. Place Order in our Database
+      const paymentInfo = {
+        id: paymentIntent.id,
+        method: paymentIntent.payment_method,
+        status: paymentIntent.status,
+      };
+
+      const result = await placeOrder(cartItems, totals, contactInfo, shippingAddress, paymentInfo);
+      
+      setIsPlacingOrder(false);
+      
+      if (result.success) {
+        toast.success(result.message);
+        router.push("/my-account");
+      } else {
+        toast.error(result.message);
+      }
     } else {
-      toast.error(result.message);
+      // Payment might require further action (e.g. 3D Secure), which is handled by Stripe redirect
+      setIsPlacingOrder(false);
     }
   };
 
@@ -103,8 +151,8 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
             </AccordionTrigger>
             <AccordionContent className="pt-4 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex flex-col gap-1"><FloatingInput id="email" label="Email Address" type="email" {...register("email")} />{errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}</div>
-                <div className="flex flex-col gap-1"><FloatingInput id="phone" label="Phone Number" type="tel" {...register("phone")} />{errors.phone && <span className="text-red-500 text-sm">{errors.phone.message}</span>}</div>
+                <div className="flex flex-col gap-1"><FloatingInput id="email" label="Email Address" type="email" {...register("email")} />{errors.email && <span className="text-red-500 text-sm">{errors.email?.message as string}</span>}</div>
+                <div className="flex flex-col gap-1"><FloatingInput id="phone" label="Phone Number" type="tel" {...register("phone")} />{errors.phone && <span className="text-red-500 text-sm">{errors.phone?.message as string}</span>}</div>
               </div>
               <div className="flex justify-end">
                 <Button
@@ -127,14 +175,14 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
             </AccordionTrigger>
             <AccordionContent className="pt-4 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex flex-col gap-1"><FloatingInput id="fname" label="First Name" type="text" {...register("fname")} />{errors.fname && <span className="text-red-500 text-sm">{errors.fname.message}</span>}</div>
-                <div className="flex flex-col gap-1"><FloatingInput id="lname" label="Last Name" type="text" {...register("lname")} />{errors.lname && <span className="text-red-500 text-sm">{errors.lname.message}</span>}</div>
+                <div className="flex flex-col gap-1"><FloatingInput id="fname" label="First Name" type="text" {...register("fname")} />{errors.fname && <span className="text-red-500 text-sm">{errors.fname?.message as string}</span>}</div>
+                <div className="flex flex-col gap-1"><FloatingInput id="lname" label="Last Name" type="text" {...register("lname")} />{errors.lname && <span className="text-red-500 text-sm">{errors.lname?.message as string}</span>}</div>
               </div>
-              <div className="flex flex-col gap-1"><FloatingInput id="address" label="Address" type="text" {...register("address")} />{errors.address && <span className="text-red-500 text-sm">{errors.address.message}</span>}</div>
-              <div className="flex flex-col gap-1"><FloatingInput id="city" label="City" type="text" {...register("city")} />{errors.city && <span className="text-red-500 text-sm">{errors.city.message}</span>}</div>
+              <div className="flex flex-col gap-1"><FloatingInput id="address" label="Address" type="text" {...register("address")} />{errors.address && <span className="text-red-500 text-sm">{errors.address?.message as string}</span>}</div>
+              <div className="flex flex-col gap-1"><FloatingInput id="city" label="City" type="text" {...register("city")} />{errors.city && <span className="text-red-500 text-sm">{errors.city?.message as string}</span>}</div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex flex-col gap-1"><FloatingInput id="country" label="Country" type="text" {...register("country")} />{errors.country && <span className="text-red-500 text-sm">{errors.country.message}</span>}</div>
-                <div className="flex flex-col gap-1"><FloatingInput id="zip" label="Postal Code" type="text" {...register("zip")} />{errors.zip && <span className="text-red-500 text-sm">{errors.zip.message}</span>}</div>
+                <div className="flex flex-col gap-1"><FloatingInput id="country" label="Country (e.g. US)" type="text" {...register("country")} />{errors.country && <span className="text-red-500 text-sm">{errors.country?.message as string}</span>}</div>
+                <div className="flex flex-col gap-1"><FloatingInput id="zip" label="Postal Code" type="text" {...register("zip")} />{errors.zip && <span className="text-red-500 text-sm">{errors.zip?.message as string}</span>}</div>
               </div>
               <div className="flex justify-end">
                 <Button
@@ -155,12 +203,23 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
             <AccordionTrigger className="font-headline-md text-headline-md text-primary hover:text-tertiary-fixed-dim transition-colors py-4 hover:no-underline">
               3. Payment Method
             </AccordionTrigger>
-            <AccordionContent className="pt-4 space-y-6">
-              <div className="flex flex-col gap-1"><FloatingInput id="card" label="Card Number" type="text" {...register("card")} />{errors.card && <span className="text-red-500 text-sm">{errors.card.message}</span>}</div>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="flex flex-col gap-1"><FloatingInput id="exp" label="Expiration (MM/YY)" type="text" {...register("exp")} />{errors.exp && <span className="text-red-500 text-sm">{errors.exp.message}</span>}</div>
-                <div className="flex flex-col gap-1"><FloatingInput id="cvc" label="CVC" type="text" {...register("cvc")} />{errors.cvc && <span className="text-red-500 text-sm">{errors.cvc.message}</span>}</div>
-              </div>
+            <AccordionContent className="pt-4 space-y-6 min-h-[250px]">
+              <PaymentElement 
+                options={{
+                  layout: "tabs",
+                  fields: {
+                    billingDetails: {
+                      name: 'never',
+                      email: 'never',
+                      phone: 'never',
+                      address: {
+                        country: 'never',
+                        postalCode: 'never'
+                      }
+                    }
+                  }
+                }}
+              />
             </AccordionContent>
           </AccordionItem>
         </Accordion>
@@ -176,7 +235,6 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
               <p className="text-secondary font-body-md">Your cart is empty.</p>
             ) : (
               cartItems.map((item) => {
-                // Get the first image URL or a placeholder
                 const imageUrl = item.product?.product_images?.[0]?.image_url || "/placeholder-image.jpg";
 
                 return (
@@ -231,7 +289,7 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
             size="lg"
             type="submit"
             className="w-full rounded-none uppercase text-on-primary flex justify-center items-center gap-2"
-            disabled={cartItems.length === 0 || isPlacingOrder}
+            disabled={cartItems.length === 0 || isPlacingOrder || !stripe || !elements}
           >
             <span className="text-surface material-symbols-outlined text-[18px]">
               {isPlacingOrder ? "hourglass_empty" : "lock"}
@@ -241,5 +299,55 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
         </div>
       </div>
     </form>
+  );
+}
+
+export default function CheckoutClient({ userProfile, cartItems, totals, clientSecret }: CheckoutClientProps) {
+  if (!clientSecret) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="text-primary font-body-md">Initializing secure checkout...</div>
+      </div>
+    );
+  }
+
+  const appearance = {
+    theme: 'flat' as const,
+    variables: {
+      fontFamily: 'Inter, sans-serif',
+      fontLineHeight: '1.5',
+      borderRadius: '0px',
+      colorBackground: '#f9f9f9',
+      colorPrimaryText: '#1a1c1c',
+      colorText: '#444748',
+      colorTextPlaceholder: '#747878',
+      colorDanger: '#ba1a1a',
+      spacingUnit: '4px',
+    },
+    rules: {
+      '.Input': {
+        border: 'none',
+        borderBottom: '1px solid #747878',
+        boxShadow: 'none',
+        backgroundColor: 'transparent',
+      },
+      '.Input:focus': {
+        borderBottom: '2px solid #1a1c1c',
+        boxShadow: 'none',
+      },
+      '.Label': {
+        color: '#444748',
+        textTransform: 'uppercase',
+        letterSpacing: '0.1em',
+        fontSize: '12px',
+        fontWeight: '600',
+      }
+    }
+  };
+
+  return (
+    <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
+      <CheckoutForm userProfile={userProfile} cartItems={cartItems} totals={totals} />
+    </Elements>
   );
 }

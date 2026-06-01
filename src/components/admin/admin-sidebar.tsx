@@ -12,12 +12,14 @@ import {
   LogOut,
   Palette,
   Ruler,
-  Users
+  Users,
+  ShoppingCart
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "Products", href: "/admin/products", icon: Package },
   { name: "Categories", href: "/admin/categories", icon: Tags },

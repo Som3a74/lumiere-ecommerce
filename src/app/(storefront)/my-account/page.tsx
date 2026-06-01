@@ -12,8 +12,7 @@ export default async function MyAccountPage() {
     .from("orders")
     .select("*")
     .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(3);
+    .order("created_at", { ascending: false });
 
   const { data: wishlistData } = await supabase
     .from("wishlist_items")
