@@ -82,7 +82,7 @@ export function FiltersClient() {
           <Button
             variant="ghost"
             onClick={() => toggleDropdown("category")}
-            className="font-body-md text-body-md text-primary flex items-center gap-2 whitespace-nowrap hover:text-secondary transition-colors hover:bg-transparent px-0"
+            className="text-xs text-primary flex items-center gap-2 whitespace-nowrap hover:text-secondary transition-colors hover:bg-transparent px-0"
           >
             {categories.find(c => c.value === currentCategory)?.label || "Collection"} <span className="material-symbols-outlined text-sm">{openDropdown === "category" ? "expand_less" : "expand_more"}</span>
           </Button>
@@ -94,7 +94,7 @@ export function FiltersClient() {
                   variant="ghost"
                   key={cat.label}
                   onClick={() => handleFilterChange("category", cat.value)}
-                  className={`w-full justify-start rounded-none px-4 py-2 font-body-md hover:bg-surface-container-low transition-colors ${currentCategory === cat.value ? "text-primary font-bold bg-surface-container-low" : "text-secondary"}`}
+                  className={`w-full justify-start rounded-none px-4 py-2 text-xs hover:bg-surface-container-low transition-colors ${currentCategory === cat.value ? "text-primary font-bold bg-surface-container-low" : "text-secondary"}`}
                 >
                   {cat.label}
                 </Button>
@@ -108,7 +108,7 @@ export function FiltersClient() {
           <Button
             variant="ghost"
             onClick={() => toggleDropdown("material")}
-            className="font-body-md text-body-md text-primary flex items-center gap-2 whitespace-nowrap hover:text-secondary transition-colors hover:bg-transparent px-0"
+            className="text-xs text-primary flex items-center gap-2 whitespace-nowrap hover:text-secondary transition-colors hover:bg-transparent px-0"
           >
             {materials.find(m => m.value === currentMaterial)?.label || "Material"} <span className="material-symbols-outlined text-sm">{openDropdown === "material" ? "expand_less" : "expand_more"}</span>
           </Button>
@@ -120,7 +120,7 @@ export function FiltersClient() {
                   variant="ghost"
                   key={mat.label}
                   onClick={() => handleFilterChange("material", mat.value)}
-                  className={`w-full justify-start rounded-none px-4 py-2 font-body-md hover:bg-surface-container-low transition-colors ${currentMaterial === mat.value ? "text-primary font-bold bg-surface-container-low" : "text-secondary"}`}
+                  className={`w-full justify-start rounded-none px-4 py-2 text-xs hover:bg-surface-container-low transition-colors ${currentMaterial === mat.value ? "text-primary font-bold bg-surface-container-low" : "text-secondary"}`}
                 >
                   {mat.label}
                 </Button>
@@ -135,7 +135,7 @@ export function FiltersClient() {
         <Button
           variant="ghost"
           onClick={() => toggleDropdown("sort")}
-          className="font-body-md text-body-md text-primary flex items-center gap-2 whitespace-nowrap hover:text-secondary transition-colors hover:bg-transparent px-0"
+          className="text-xs text-primary flex items-center gap-2 whitespace-nowrap hover:text-secondary transition-colors hover:bg-transparent px-0"
         >
           {sortOptions.find(o => o.value === currentSort)?.label || "Sort by"} <span className="material-symbols-outlined text-sm">sort</span>
         </Button>
@@ -147,7 +147,7 @@ export function FiltersClient() {
                 variant="ghost"
                 key={opt.value}
                 onClick={() => handleFilterChange("sort", opt.value)}
-                className={`w-full justify-start rounded-none px-4 py-2 font-body-md hover:bg-surface-container-low transition-colors ${currentSort === opt.value ? "text-primary font-bold bg-surface-container-low" : "text-secondary"}`}
+                className={`w-full justify-start rounded-none px-4 py-2 text-xs hover:bg-surface-container-low transition-colors ${currentSort === opt.value ? "text-primary font-bold bg-surface-container-low" : "text-secondary"}`}
               >
                 {opt.label}
               </Button>

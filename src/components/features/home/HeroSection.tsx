@@ -4,13 +4,15 @@ export function HeroSection() {
   return (
     <section className="relative h-screen w-full flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 z-0 bg-surface-container">
-        <Image
-          width={1920}
-          height={1080}
-          alt="Cinematic luxury hero image"
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
           className="w-full h-full object-cover object-center opacity-80"
-          src="/assets/images/about/hero section.webp"
-        />
+        >
+          <source src="/assets/videos/hero section video.mp4" type="video/mp4" />
+        </video>
         <div className="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent"></div>
       </div>
       <div className="relative z-10 text-center px-margin-mobile flex flex-col items-center fade-in-section is-visible">
