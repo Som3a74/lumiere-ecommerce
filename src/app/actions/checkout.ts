@@ -22,7 +22,7 @@ export async function placeOrder(
     .from("orders")
     .insert({
       user_id: user.id,
-      status: "Pending",
+      status: "pending",
       total_amount: totals.total,
       contact_info: contactInfo,
       shipping_address: shippingAddress,
@@ -42,6 +42,7 @@ export async function placeOrder(
     return {
       order_id: order.id,
       product_id: productData.id,
+      variant_id: item.variant_id || null,
       quantity: item.quantity,
       price_at_time: productData.price,
     };

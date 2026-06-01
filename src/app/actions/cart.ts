@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/utils/supabase/server";
 
-export async function addToCart(productId: string, options?: { color?: string; size?: string }) {
+export async function addToCart(productId: string, options?: { variantId?: string }) {
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -11,18 +11,18 @@ export async function addToCart(productId: string, options?: { color?: string; s
     return { error: "You must be logged in to add items to your cart" };
   }
 
-  // Check if item is already in cart with same product, color, and size
+  // Check if item is already in cart with same product and variant
   let existingQuery = supabase
     .from("cart_items")
     .select("id, quantity")
     .eq("user_id", user.id)
     .eq("product_id", productId);
 
-  if (options?.color) existingQuery = existingQuery.eq("color", options.color);
-  else existingQuery = existingQuery.is("color", null);
-  
-  if (options?.size) existingQuery = existingQuery.eq("size", options.size);
-  else existingQuery = existingQuery.is("size", null);
+  if (options?.variantId) {
+    existingQuery = existingQuery.eq("variant_id", options.variantId);
+  } else {
+    existingQuery = existingQuery.is("variant_id", null);
+  }
 
   const { data: existingCartItem } = await existingQuery.single();
 
@@ -45,8 +45,7 @@ export async function addToCart(productId: string, options?: { color?: string; s
           user_id: user.id,
           product_id: productId,
           quantity: 1,
-          color: options?.color || null,
-          size: options?.size || null,
+          variant_id: options?.variantId || null,
         }
       ]);
 

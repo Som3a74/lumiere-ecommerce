@@ -17,8 +17,12 @@ export default async function CartPage() {
     .select(`
       id,
       quantity,
-      color,
-      size,
+      variant_id,
+      variant:product_variants (
+        id,
+        color,
+        size
+      ),
       product:products (
         id,
         name,
@@ -35,7 +39,14 @@ export default async function CartPage() {
     console.error("Error fetching cart items:", error);
   }
 
-  const items = cartItems || [];
+  const items = (cartItems || []).map(item => {
+    const variantData = Array.isArray(item.variant) ? item.variant[0] : item.variant;
+    return {
+      ...item,
+      color: variantData?.color || null,
+      size: variantData?.size || null,
+    };
+  });
 
   // Calculate Totals
   const subtotal = items.reduce((sum, item) => {

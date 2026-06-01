@@ -26,11 +26,17 @@ export default async function OrderDetailsPage(props: OrderDetailsPageProps) {
       *,
       order_items (
         *,
+        variant:product_variants (
+          id,
+          color,
+          size
+        ),
         product:products (
           name,
           product_images (
             image_url,
-            is_thumbnail
+            is_thumbnail,
+            color
           )
         )
       )

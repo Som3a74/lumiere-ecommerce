@@ -12,10 +12,7 @@ export const profileSchema = z.object({
   if (data.password && data.password.length > 0) {
     if (data.password.length < 6) {
       ctx.addIssue({
-        code: z.ZodIssueCode.too_small,
-        minimum: 6,
-        type: "string",
-        inclusive: true,
+        code: z.ZodIssueCode.custom,
         message: "Password must be at least 6 characters long",
         path: ["password"],
       });

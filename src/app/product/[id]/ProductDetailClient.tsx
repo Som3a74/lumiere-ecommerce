@@ -39,12 +39,34 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
     setSelectedImage(imagesByColor[color]?.[0] || "/placeholder-image.jpg");
   };
 
-  const getColorClass = (colorName: string) => {
+  const isColorOutOfStock = (colorName: string) => {
+    if (!product.variants || product.variants.length === 0) return false;
+    const variantsForColor = product.variants.filter((v: any) => v.color === colorName);
+    if (variantsForColor.length === 0) return false;
+    const totalStock = variantsForColor.reduce((sum: number, v: any) => sum + (v.stock || 0), 0);
+    return totalStock <= 0;
+  };
+
+  const isSizeOutOfStockForColor = (sizeName: string, colorName: string) => {
+    if (!product.variants || product.variants.length === 0) return false;
+    const variant = product.variants.find((v: any) => v.color === colorName && v.size === sizeName);
+    if (!variant) return true; // Does not exist
+    return (variant.stock || 0) <= 0;
+  };
+
+  const currentVariant = product.variants?.find((v: any) => v.color === selectedColor && v.size === selectedSize) 
+                         || product.variants?.find((v: any) => v.color === selectedColor);
+
+  const displayPrice = currentVariant?.price ? `$${currentVariant.price.toLocaleString()}` : product.price;
+  const comparePrice = currentVariant?.compare_at_price ? `$${currentVariant.compare_at_price.toLocaleString()}` : null;
+
+  const getInlineColor = (colorName: string) => {
     const lower = colorName.toLowerCase();
-    if (lower.includes("gold") && lower.includes("rose")) return "bg-amber-200";
-    if (lower.includes("gold")) return "bg-yellow-300";
-    if (lower.includes("carbon") || lower.includes("black")) return "bg-slate-800";
-    return "bg-zinc-200"; // Platinum/Silver default
+    if (lower.includes("gold") && lower.includes("rose")) return "#FDE68A"; // amber-200
+    if (lower.includes("gold")) return "#FDE047"; // yellow-300
+    if (lower.includes("carbon") || lower.includes("black")) return "#1E293B"; // slate-800
+    if (lower.includes("platinum") || lower.includes("silver")) return "#E4E4E7"; // zinc-200
+    return lower; // standard CSS colors like "yellow", "green", or hex codes
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -56,7 +78,13 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
 
   const handleAddToCart = () => {
     startTransition(async () => {
-      const result = await addToCart(product.id, { color: selectedColor, size: selectedSize });
+      // Find the corresponding variant from product.variants
+      const variant = product.variants?.find(
+        (v: any) => v.color === selectedColor && v.size === selectedSize
+      );
+      const variantId = variant?.id || undefined;
+
+      const result = await addToCart(product.id, { variantId });
       if (result?.error) {
         if (result.error.includes("logged in")) {
           toast.error("You must be logged in to add items to your cart.");
@@ -147,10 +175,15 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
             <h1 className="font-display-lg text-display-lg-mobile md:text-display-lg text-primary mb-4">
               {product.title}
             </h1>
-            <p className="font-body-lg text-body-lg text-secondary mb-6 leading-relaxed">
+            <p className="font-body-md text-body-md text-secondary mt-2">
               {product.description}
             </p>
-            <p className="font-body-lg text-body-lg text-primary">{product.price}</p>
+            <div className="flex items-center gap-3 mt-4">
+              <p className="font-body-lg text-body-lg text-primary">{displayPrice}</p>
+              {comparePrice && (
+                <p className="font-body-md text-secondary line-through">{comparePrice}</p>
+              )}
+            </div>
           </div>
 
           {/* Variations */}
@@ -159,14 +192,23 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
               Material: <span className="text-secondary font-normal ml-2">{selectedColor}</span>
             </p>
             <div className="flex gap-4">
-              {colorsList.map((c: string, idx: number) => (
-                <button
-                  key={idx}
-                  onClick={() => handleColorSelect(c)}
-                  aria-label={`Select ${c}`}
-                  className={`w-10 h-10 rounded-full border-2 ${selectedColor === c ? "border-primary" : "border-transparent hover:border-surface-dim transition-colors"} ${getColorClass(c)} shadow-sm`}
-                ></button>
-              ))}
+              {colorsList.map((c: string, idx: number) => {
+                const outOfStock = isColorOutOfStock(c);
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => !outOfStock && handleColorSelect(c)}
+                    aria-label={`Select ${c}`}
+                    disabled={outOfStock}
+                    className={`w-10 h-10 rounded-full border-2 relative overflow-hidden ${selectedColor === c ? "border-primary" : "border-transparent"} ${outOfStock ? "opacity-50 cursor-not-allowed hover:border-transparent" : "hover:border-surface-dim transition-colors"} shadow-sm`}
+                    style={{ backgroundColor: getInlineColor(c) }}
+                  >
+                    {outOfStock && (
+                      <span className="absolute w-[140%] h-[2px] bg-error -rotate-45 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"></span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -176,15 +218,22 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
               Size: <span className="text-secondary font-normal ml-2">{selectedSize}</span>
             </p>
             <div className="flex flex-wrap gap-4">
-              {sizesList.map((s: string, idx: number) => (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedSize(s)}
-                  className={`px-4 py-2 border ${selectedSize === s ? "border-primary bg-primary text-on-primary" : "border-surface-container text-primary hover:border-surface-dim"} font-label-caps text-label-caps uppercase transition-colors`}
-                >
-                  {s}
-                </button>
-              ))}
+              {sizesList.map((s: string, idx: number) => {
+                const outOfStock = isSizeOutOfStockForColor(s, selectedColor);
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => !outOfStock && setSelectedSize(s)}
+                    disabled={outOfStock}
+                    className={`px-4 py-2 border relative overflow-hidden ${selectedSize === s ? "border-primary bg-primary text-on-primary" : "border-surface-container text-primary"} ${outOfStock ? "opacity-50 cursor-not-allowed bg-surface-dim text-secondary" : "hover:border-surface-dim transition-colors"} font-label-caps text-label-caps uppercase`}
+                  >
+                    {s}
+                    {outOfStock && (
+                      <span className="absolute w-[120%] h-[1px] bg-error -rotate-12 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-70"></span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

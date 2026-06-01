@@ -13,9 +13,17 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       name,
       description,
       price,
-      category,
-      colors,
-      sizes,
+      categories (
+        name
+      ),
+      product_variants (
+        id,
+        color,
+        size,
+        stock,
+        price,
+        compare_at_price
+      ),
       features,
       product_images (
         image_url,
@@ -66,8 +74,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     price: `$${product.price.toLocaleString()}`,
     description: product.description,
     images: (product.product_images || []), // Keeping objects to extract color later
-    colors: product.colors || [],
-    sizes: product.sizes || [],
+    colors: Array.from(new Set((product.product_variants || []).map((v: any) => v.color).filter(Boolean))),
+    sizes: Array.from(new Set((product.product_variants || []).map((v: any) => v.size).filter(Boolean))),
+    variants: product.product_variants || [],
     features: product.features || [],
     isWishlisted: userWishlist.includes(product.id),
   };

@@ -6,7 +6,7 @@ import { FiltersClient } from "./FiltersClient";
 export default async function CollectionsPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const supabase = await createClient();
   const resolvedParams = await searchParams;
-  
+
   const category = typeof resolvedParams.category === 'string' ? resolvedParams.category : null;
   const material = typeof resolvedParams.material === 'string' ? resolvedParams.material : null;
   const sort = typeof resolvedParams.sort === 'string' ? resolvedParams.sort : 'newest';
@@ -20,7 +20,7 @@ export default async function CollectionsPage({ searchParams }: { searchParams: 
       name,
       description,
       price,
-      category,
+      categories!inner(name),
       created_at,
       product_images (
         image_url
@@ -33,11 +33,11 @@ export default async function CollectionsPage({ searchParams }: { searchParams: 
 
   if (category) {
     if (category === 'Watches' || category === 'Timepieces') {
-      query = query.in('category', ['Chronograph', 'Automatic', 'Tourbillon', 'Heritage']);
+      query = query.in('categories.name', ['Chronograph', 'Automatic', 'Tourbillon', 'Heritage']);
     } else if (category === 'Bags' || category === 'Leather Goods') {
-      query = query.in('category', ['Leather Goods', 'Tote']);
+      query = query.in('categories.name', ['Leather Goods', 'Tote']);
     } else {
-      query = query.eq('category', category);
+      query = query.eq('categories.name', category);
     }
   }
 
@@ -69,7 +69,7 @@ export default async function CollectionsPage({ searchParams }: { searchParams: 
       .from("wishlist_items")
       .select("product_id")
       .eq("user_id", user.id);
-    
+
     if (wishlistData) {
       userWishlist = wishlistData.map(item => item.product_id);
     }
@@ -80,7 +80,7 @@ export default async function CollectionsPage({ searchParams }: { searchParams: 
     productId: product.id,
     title: product.name,
     price: `$${product.price.toLocaleString()}`,
-    category: product.category,
+    category: (Array.isArray(product.categories) ? product.categories[0] : product.categories)?.name || "Uncategorized",
     imageUrl: product.product_images?.[0]?.image_url || "/assets/images/logo.png",
     href: `/product/${product.id}`,
     isWishlisted: userWishlist.includes(product.id),
@@ -98,7 +98,7 @@ export default async function CollectionsPage({ searchParams }: { searchParams: 
             Discover our collection of meticulously crafted pieces, where tradition meets contemporary elegance.
           </p>
         </div>
-        
+
         <FiltersClient />
       </header>
 
@@ -106,10 +106,10 @@ export default async function CollectionsPage({ searchParams }: { searchParams: 
       {collectionsProducts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
           {collectionsProducts.map((product, index) => (
-            <ProductCard 
-              key={product.productId} 
-              {...product} 
-              className={index % 4 === 1 || index % 4 === 3 ? "md:mt-12 lg:mt-0" : ""} 
+            <ProductCard
+              key={product.productId}
+              {...product}
+              className={index % 4 === 1 || index % 4 === 3 ? "md:mt-12 lg:mt-0" : ""}
             />
           ))}
         </div>

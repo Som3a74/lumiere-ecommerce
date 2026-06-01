@@ -24,6 +24,7 @@ export default async function CheckoutPage() {
     .select(`
       id,
       quantity,
+      variant_id,
       product:products (
         id,
         name,

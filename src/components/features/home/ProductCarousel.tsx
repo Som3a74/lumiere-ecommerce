@@ -16,7 +16,7 @@ export async function ProductCarousel({ type, title }: ProductCarouselProps) {
       name,
       description,
       price,
-      category,
+      categories (name),
       created_at,
       product_images (
         image_url
@@ -58,7 +58,7 @@ export async function ProductCarousel({ type, title }: ProductCarouselProps) {
     name: product.name,
     description: product.description || "",
     price: `$${product.price?.toLocaleString()}`,
-    category: product.category,
+    category: (Array.isArray(product.categories) ? product.categories[0] : product.categories)?.name || "Uncategorized",
     image: product.product_images?.[0]?.image_url || "/assets/images/logo.png",
     isWishlisted: userWishlist.includes(product.id),
   }));

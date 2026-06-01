@@ -7,7 +7,11 @@ interface OrderItem {
   price_at_time: number;
   product: {
     name: string;
-    product_images: { image_url: string; is_thumbnail: boolean }[];
+    product_images: { image_url: string; is_thumbnail: boolean; color?: string }[];
+  };
+  variant?: {
+    color?: string;
+    size?: string;
   };
 }
 
@@ -27,8 +31,12 @@ export function OrderItemsList({ items }: OrderItemsListProps) {
           const product = Array.isArray(item.product) ? item.product[0] : item.product;
           if (!product) return null; // Defensive check
           
-          // Find thumbnail, fallback to first image or placeholder
-          const thumbnail = product.product_images?.find((img: { is_thumbnail: boolean }) => img.is_thumbnail)?.image_url 
+          // Find thumbnail based on ordered variant color
+          const variantColor = item.variant?.color;
+          const matchingImages = product.product_images?.filter((img: any) => !variantColor || img.color === variantColor);
+          
+          const thumbnail = matchingImages?.find((img: any) => img.is_thumbnail)?.image_url 
+            || matchingImages?.[0]?.image_url
             || product.product_images?.[0]?.image_url 
             || "/placeholder-image.jpg";
 
@@ -51,6 +59,13 @@ export function OrderItemsList({ items }: OrderItemsListProps) {
                     </h3>
                   </Link>
                   <p className="font-body-md text-secondary mt-2">Qty: {item.quantity}</p>
+                  {item.variant && (
+                    <p className="font-body-sm text-secondary mt-1">
+                      {item.variant.color && <span>Color: {item.variant.color}</span>}
+                      {item.variant.color && item.variant.size && <span> | </span>}
+                      {item.variant.size && <span>Size: {item.variant.size}</span>}
+                    </p>
+                  )}
                 </div>
                 
                 <div className="flex justify-between items-end mt-4 sm:mt-0">
