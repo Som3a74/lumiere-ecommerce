@@ -43,10 +43,17 @@ export default async function CartPage() {
 
   const items = (cartItems || []).map(item => {
     const variantData = Array.isArray(item.variant) ? item.variant[0] : item.variant;
+    
+    const extractName = (data: any) => {
+      if (!data) return null;
+      if (Array.isArray(data)) return data[0]?.name || null;
+      return data.name || null;
+    };
+
     return {
       ...item,
-      color: variantData?.color?.name || null,
-      size: variantData?.size?.name || null,
+      color: extractName(variantData?.color),
+      size: extractName(variantData?.size),
     };
   });
 
