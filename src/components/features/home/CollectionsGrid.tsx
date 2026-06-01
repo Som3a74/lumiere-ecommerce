@@ -24,7 +24,7 @@ export function CollectionsGrid() {
           <div className="absolute inset-0 bg-black/10 transition-opacity duration-300 group-hover:bg-black/20"></div>
           <div className="absolute bottom-8 left-8 text-surface-bright">
             <h3 className="font-headline-md text-headline-md mb-2">Timepieces</h3>
-            <Link className="font-label-caps text-label-caps uppercase tracking-widest border-b border-surface-bright pb-1 hover:border-tertiary-fixed-dim hover:text-tertiary-fixed-dim transition-colors" href="/collections">Explore</Link>
+            <Link href="/collections?category=Watches" className="font-label-caps text-label-caps uppercase tracking-widest border-b border-surface-bright pb-1 hover:border-tertiary-fixed-dim hover:text-tertiary-fixed-dim transition-colors" >Explore</Link>
           </div>
         </div>
 
@@ -44,7 +44,7 @@ export function CollectionsGrid() {
             <div className="absolute inset-0 bg-black/10 transition-opacity duration-300 group-hover:bg-black/20"></div>
             <div className="absolute bottom-6 left-6 text-surface-bright">
               <h3 className="font-headline-md text-headline-md mb-2">Leather Goods</h3>
-              <Link className="font-label-caps text-label-caps uppercase tracking-widest border-b border-surface-bright pb-1 hover:border-tertiary-fixed-dim hover:text-tertiary-fixed-dim transition-colors" href="#">Explore</Link>
+              <Link href="/collections?category=Bags" className="font-label-caps text-label-caps uppercase tracking-widest border-b border-surface-bright pb-1 hover:border-tertiary-fixed-dim hover:text-tertiary-fixed-dim transition-colors" >Explore</Link>
             </div>
           </div>
 

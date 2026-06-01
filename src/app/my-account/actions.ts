@@ -2,16 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/utils/supabase/server";
+import { ProfileInput } from "@/lib/validations/profile";
 
-export async function updateProfile(formData: FormData) {
-  const firstName = formData.get("fname") as string;
-  const lastName = formData.get("lname") as string;
-  const email = formData.get("email") as string; // Read-only but included
-  const phone = formData.get("phone") as string;
-  const address = formData.get("address") as string;
-
-  const password = formData.get("password") as string;
-  const confirmPassword = formData.get("confirmPassword") as string;
+export async function updateProfile(data: ProfileInput) {
+  const { fname: firstName, lname: lastName, phone, address, password, confirmPassword } = data;
 
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();

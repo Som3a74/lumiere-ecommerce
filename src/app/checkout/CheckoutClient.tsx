@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { checkoutSchema, CheckoutInput } from "@/lib/validations/checkout";
 import { FloatingInput } from "@/components/ui/floating-input";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -29,60 +32,47 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
   const [openAccordion, setOpenAccordion] = useState<string>("contact-info");
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
-  const [formData, setFormData] = useState({
-    email: userProfile.email || "",
-    phone: userProfile.phone || "",
-    fname: userProfile.firstName || "",
-    lname: userProfile.lastName || "",
-    address: "",
-    city: "",
-    country: "",
-    zip: "",
-    card: "",
-    exp: "",
-    cvc: ""
+  const { register, handleSubmit, formState: { errors } } = useForm<CheckoutInput>({
+    resolver: zodResolver(checkoutSchema),
+    defaultValues: {
+      email: userProfile.email || "",
+      phone: userProfile.phone || "",
+      fname: userProfile.firstName || "",
+      lname: userProfile.lastName || "",
+      address: "",
+      city: "",
+      country: "",
+      zip: "",
+      card: "",
+      exp: "",
+      cvc: ""
+    }
   });
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData(prev => ({ ...prev, [id]: value }));
-  };
-
-  const isFormValid = Object.values(formData).every(val => val.trim() !== "");
-
-  const toggleAccordion = (id: string) => {
-    setOpenAccordion(openAccordion === id ? "" : id);
-  };
 
   const nextStep = (id: string) => {
     setOpenAccordion(id);
   };
 
-  const handlePlaceOrder = async () => {
-    if (!isFormValid) {
-      toast.error("Please fill in all contact, shipping, and payment information before placing your order.");
-      return;
-    }
-    
+  const onSubmit = async (data: CheckoutInput) => {
     setIsPlacingOrder(true);
     
     const contactInfo = {
-      email: formData.email,
-      phone: formData.phone,
-      firstName: formData.fname,
-      lastName: formData.lname,
+      email: data.email,
+      phone: data.phone,
+      firstName: data.fname,
+      lastName: data.lname,
     };
     
     const shippingAddress = {
-      address: formData.address,
-      city: formData.city,
-      country: formData.country,
-      zip: formData.zip,
+      address: data.address,
+      city: data.city,
+      country: data.country,
+      zip: data.zip,
     };
     
     const paymentInfo = {
-      card: formData.card.slice(-4), // Only store last 4 digits mock
-      exp: formData.exp,
+      card: data.card.slice(-4), // Only store last 4 digits mock
+      exp: data.exp,
     };
 
     const result = await placeOrder(cartItems, totals, contactInfo, shippingAddress, paymentInfo);
@@ -98,7 +88,7 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
   };
 
   return (
-    <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 md:py-24 grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 md:py-24 grid grid-cols-1 lg:grid-cols-12 gap-gutter">
       {/* Left Column: Checkout Steps */}
       <div className="lg:col-span-7 xl:col-span-8 flex flex-col space-y-8">
         <div className="font-headline-lg text-headline-lg text-primary mb-4 border-b border-surface-container pb-4">
@@ -113,13 +103,14 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
             </AccordionTrigger>
             <AccordionContent className="pt-4 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FloatingInput id="email" label="Email Address" type="email" value={formData.email} onChange={handleInputChange} />
-                <FloatingInput id="phone" label="Phone Number" type="tel" value={formData.phone} onChange={handleInputChange} />
+                <div className="flex flex-col gap-1"><FloatingInput id="email" label="Email Address" type="email" {...register("email")} />{errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}</div>
+                <div className="flex flex-col gap-1"><FloatingInput id="phone" label="Phone Number" type="tel" {...register("phone")} />{errors.phone && <span className="text-red-500 text-sm">{errors.phone.message}</span>}</div>
               </div>
               <div className="flex justify-end">
                 <Button
                   variant="default"
                   size="lg"
+                  type="button"
                   className="rounded-none uppercase text-on-primary"
                   onClick={() => nextStep("shipping-address")}
                 >
@@ -136,19 +127,20 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
             </AccordionTrigger>
             <AccordionContent className="pt-4 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FloatingInput id="fname" label="First Name" type="text" value={formData.fname} onChange={handleInputChange} />
-                <FloatingInput id="lname" label="Last Name" type="text" value={formData.lname} onChange={handleInputChange} />
+                <div className="flex flex-col gap-1"><FloatingInput id="fname" label="First Name" type="text" {...register("fname")} />{errors.fname && <span className="text-red-500 text-sm">{errors.fname.message}</span>}</div>
+                <div className="flex flex-col gap-1"><FloatingInput id="lname" label="Last Name" type="text" {...register("lname")} />{errors.lname && <span className="text-red-500 text-sm">{errors.lname.message}</span>}</div>
               </div>
-              <FloatingInput id="address" label="Address" type="text" value={formData.address} onChange={handleInputChange} />
-              <FloatingInput id="city" label="City" type="text" value={formData.city} onChange={handleInputChange} />
+              <div className="flex flex-col gap-1"><FloatingInput id="address" label="Address" type="text" {...register("address")} />{errors.address && <span className="text-red-500 text-sm">{errors.address.message}</span>}</div>
+              <div className="flex flex-col gap-1"><FloatingInput id="city" label="City" type="text" {...register("city")} />{errors.city && <span className="text-red-500 text-sm">{errors.city.message}</span>}</div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FloatingInput id="country" label="Country" type="text" value={formData.country} onChange={handleInputChange} />
-                <FloatingInput id="zip" label="Postal Code" type="text" value={formData.zip} onChange={handleInputChange} />
+                <div className="flex flex-col gap-1"><FloatingInput id="country" label="Country" type="text" {...register("country")} />{errors.country && <span className="text-red-500 text-sm">{errors.country.message}</span>}</div>
+                <div className="flex flex-col gap-1"><FloatingInput id="zip" label="Postal Code" type="text" {...register("zip")} />{errors.zip && <span className="text-red-500 text-sm">{errors.zip.message}</span>}</div>
               </div>
               <div className="flex justify-end">
                 <Button
                   variant="default"
                   size="lg"
+                  type="button"
                   className="rounded-none uppercase text-on-primary"
                   onClick={() => nextStep("payment-method")}
                 >
@@ -164,10 +156,10 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
               3. Payment Method
             </AccordionTrigger>
             <AccordionContent className="pt-4 space-y-6">
-              <FloatingInput id="card" label="Card Number" type="text" value={formData.card} onChange={handleInputChange} />
+              <div className="flex flex-col gap-1"><FloatingInput id="card" label="Card Number" type="text" {...register("card")} />{errors.card && <span className="text-red-500 text-sm">{errors.card.message}</span>}</div>
               <div className="grid grid-cols-2 gap-6">
-                <FloatingInput id="exp" label="Expiration (MM/YY)" type="text" value={formData.exp} onChange={handleInputChange} />
-                <FloatingInput id="cvc" label="CVC" type="text" value={formData.cvc} onChange={handleInputChange} />
+                <div className="flex flex-col gap-1"><FloatingInput id="exp" label="Expiration (MM/YY)" type="text" {...register("exp")} />{errors.exp && <span className="text-red-500 text-sm">{errors.exp.message}</span>}</div>
+                <div className="flex flex-col gap-1"><FloatingInput id="cvc" label="CVC" type="text" {...register("cvc")} />{errors.cvc && <span className="text-red-500 text-sm">{errors.cvc.message}</span>}</div>
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -237,9 +229,9 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
           <Button
             variant="default"
             size="lg"
+            type="submit"
             className="w-full rounded-none uppercase text-on-primary flex justify-center items-center gap-2"
             disabled={cartItems.length === 0 || isPlacingOrder}
-            onClick={handlePlaceOrder}
           >
             <span className="text-surface material-symbols-outlined text-[18px]">
               {isPlacingOrder ? "hourglass_empty" : "lock"}
@@ -248,6 +240,6 @@ export default function CheckoutClient({ userProfile, cartItems, totals }: Check
           </Button>
         </div>
       </div>
-    </div>
+    </form>
   );
 }

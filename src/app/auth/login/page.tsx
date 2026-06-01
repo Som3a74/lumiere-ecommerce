@@ -2,21 +2,25 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { login } from "../actions";
+import { loginSchema, LoginInput } from "@/lib/validations/auth";
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-    const formData = new FormData(e.currentTarget);
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+  });
 
+  const onSubmit = (data: LoginInput) => {
+    setError(null);
     startTransition(async () => {
-      const result = await login(formData);
+      const result = await login(data);
       if (result?.error) {
         setError(result.error);
       }
@@ -35,14 +39,20 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-8 mt-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 mt-8">
           {error && (
             <div className="bg-red-50 text-red-500 p-4 rounded-sm font-sans text-sm border border-red-100">
               {error}
             </div>
           )}
-          <Input type="email" name="email" placeholder="EMAIL ADDRESS" required />
-          <Input type="password" name="password" placeholder="PASSWORD" required />
+          <div className="flex flex-col gap-2">
+            <Input type="email" placeholder="EMAIL ADDRESS" {...register("email")} />
+            {errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
+          </div>
+          <div className="flex flex-col gap-2">
+            <Input type="password" placeholder="PASSWORD" {...register("password")} />
+            {errors.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}
+          </div>
           <Button type="submit" variant="default" size="lg" className="w-full rounded-none uppercase text-on-primary mt-4" disabled={isPending}>
             {isPending ? "Signing In..." : "Sign In"}
           </Button>

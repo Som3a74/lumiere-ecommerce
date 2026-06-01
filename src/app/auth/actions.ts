@@ -3,10 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
+import { LoginInput, RegisterInput } from "@/lib/validations/auth";
 
-export async function login(formData: FormData) {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+export async function login(data: LoginInput) {
+  const { email, password } = data;
 
   if (!email || !password) {
     return { error: "Email and password are required" };
@@ -27,11 +27,8 @@ export async function login(formData: FormData) {
   redirect("/my-account");
 }
 
-export async function signup(formData: FormData) {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-  const firstName = formData.get("firstName") as string;
-  const lastName = formData.get("lastName") as string;
+export async function signup(data: RegisterInput) {
+  const { email, password, firstName, lastName } = data;
 
   if (!email || !password || !firstName || !lastName) {
     return { error: "All fields are required" };
@@ -39,7 +36,7 @@ export async function signup(formData: FormData) {
 
   const supabase = await createClient();
 
-  const { data, error } = await supabase.auth.signUp({
+  const { data: authData, error } = await supabase.auth.signUp({
     email,
     password,
     options: {

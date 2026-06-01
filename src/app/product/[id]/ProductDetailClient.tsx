@@ -111,8 +111,8 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
           {/* Thumbnails */}
           <div className="flex md:flex-col gap-4 overflow-x-auto md:overflow-visible w-full md:w-24 shrink-0 no-scrollbar">
             {(imagesByColor[selectedColor] || []).map((img: string, i: number) => (
-              <button 
-                key={i} 
+              <button
+                key={i}
                 onClick={() => setSelectedImage(img)}
                 className={`w-20 h-24 md:w-24 md:h-32 shrink-0 border relative overflow-hidden group ${selectedImage === img ? "border-primary" : "border-transparent hover:border-surface-dim transition-colors"}`}
               >
@@ -160,10 +160,10 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
             </p>
             <div className="flex gap-4">
               {colorsList.map((c: string, idx: number) => (
-                <button 
+                <button
                   key={idx}
                   onClick={() => handleColorSelect(c)}
-                  aria-label={`Select ${c}`} 
+                  aria-label={`Select ${c}`}
                   className={`w-10 h-10 rounded-full border-2 ${selectedColor === c ? "border-primary" : "border-transparent hover:border-surface-dim transition-colors"} ${getColorClass(c)} shadow-sm`}
                 ></button>
               ))}
@@ -177,7 +177,7 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
             </p>
             <div className="flex flex-wrap gap-4">
               {sizesList.map((s: string, idx: number) => (
-                <button 
+                <button
                   key={idx}
                   onClick={() => setSelectedSize(s)}
                   className={`px-4 py-2 border ${selectedSize === s ? "border-primary bg-primary text-on-primary" : "border-surface-container text-primary hover:border-surface-dim"} font-label-caps text-label-caps uppercase transition-colors`}
@@ -190,7 +190,7 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
 
           {/* Actions */}
           <div className="flex flex-col gap-4 mb-12">
-            <Button 
+            <Button
               variant="default"
               size="lg"
               onClick={handleAddToCart}
@@ -199,10 +199,10 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
             >
               <span className="relative z-10">{isPending ? "Adding to Cart..." : "Add to Cart"}</span>
             </Button>
-            <WishlistButton 
-              productId={product.id} 
-              initialIsWishlisted={product.isWishlisted} 
-              withText={true} 
+            <WishlistButton
+              productId={product.id}
+              initialIsWishlisted={product.isWishlisted}
+              withText={true}
             />
           </div>
 
@@ -216,7 +216,7 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
                 Engineered in Geneva, the Chronographe Éternel features a hand-wound mechanical movement visible through a sapphire crystal case back. The dial is enameled using traditional Grand Feu techniques, ensuring a brilliance that will not fade over time. The case measures a subtle 38mm, ideal for understated elegance.
               </AccordionContent>
             </AccordionItem>
-            
+
             <AccordionItem value="item-2" className="border-b border-surface-container last:border-b-0">
               <AccordionTrigger className="font-label-caps text-label-caps text-primary uppercase py-6 hover:no-underline">
                 Features & Materials
