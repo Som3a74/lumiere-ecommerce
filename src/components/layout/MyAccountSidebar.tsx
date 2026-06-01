@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { logout } from "@/app/auth/actions";
+import { logout } from "@/app/(storefront)/auth/actions";
 
 export function MyAccountSidebar() {
   const pathname = usePathname();

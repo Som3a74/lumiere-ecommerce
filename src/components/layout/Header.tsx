@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { SearchModal } from "@/components/shared/SearchModal";
-import { logout } from "@/app/auth/actions";
+import { logout } from "@/app/(storefront)/auth/actions";
 import { Button } from "@/components/ui/button";
 
 const NAV_LINKS = [
@@ -14,7 +14,7 @@ const NAV_LINKS = [
   { name: "About Us", href: "/about" },
 ];
 
-export function Header({ user }: { user?: any }) {
+export function Header({ user, isAdmin }: { user?: any, isAdmin?: boolean }) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -81,6 +81,11 @@ export function Header({ user }: { user?: any }) {
             </Link>
             {user ? (
               <>
+                {isAdmin && (
+                  <Link aria-label="Dashboard" href="/admin" className={cn("hidden lg:flex transition-colors duration-300 items-center justify-center", pathname.startsWith("/admin") ? "text-primary" : "text-primary hover:text-secondary")}>
+                    <span className="material-symbols-outlined !text-[20px]" style={{ fontVariationSettings: "'wght' 300" }}>dashboard</span>
+                  </Link>
+                )}
                 <Link aria-label="Account" href="/my-account" className={cn("hidden lg:flex transition-colors duration-300 items-center justify-center", pathname === "/my-account" ? "text-primary" : "text-primary hover:text-secondary")}>
                   <span className="material-symbols-outlined !text-[20px]" style={{ fontVariationSettings: "'wght' 300" }}>person</span>
                 </Link>
@@ -135,6 +140,11 @@ export function Header({ user }: { user?: any }) {
 
           {user ? (
             <div className="flex flex-col gap-6 items-center">
+              {isAdmin && (
+                <Link href="/admin" className="font-label-caps text-label-caps uppercase tracking-[0.2em] text-primary hover:text-secondary transition-colors">
+                  Dashboard
+                </Link>
+              )}
               <Link href="/my-account" className="font-label-caps text-label-caps uppercase tracking-[0.2em] text-primary hover:text-secondary transition-colors">
                 My Account
               </Link>

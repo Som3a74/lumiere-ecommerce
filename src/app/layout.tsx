@@ -2,9 +2,6 @@ import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { createClient } from "@/utils/supabase/server";
 import { Toaster } from "@/components/ui/sonner";
 
 const playfairDisplayHeading = Playfair_Display({ subsets: ['latin'], variable: '--font-heading' });
@@ -16,13 +13,11 @@ export const metadata: Metadata = {
   description: "The Art of Quiet Luxury. Precision engineering meets timeless elegance.",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
 
   return (
     <html
@@ -34,9 +29,7 @@ export default async function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-background text-on-background">
         <Toaster position="top-center" />
-        <Header user={data?.user} />
-        <main className="flex-1 mt-24">{children}</main>
-        <Footer />
+        {children}
       </body>
     </html>
   );
