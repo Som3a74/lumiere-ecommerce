@@ -26,19 +26,22 @@ export default async function OrderDetailsPage(props: OrderDetailsPageProps) {
       *,
       order_items (
         *,
-        variant:product_variants (
-          id,
-          color,
-          size
-        ),
-        product:products (
-          name,
-          product_images (
-            image_url,
-            is_thumbnail,
-            color
+          variant:product_variants (
+            id,
+            color_id,
+            size_id,
+            color:colors(name),
+            size:sizes(name)
+          ),
+          product:products (
+            name,
+            product_images (
+              image_url,
+              is_thumbnail,
+              color_id,
+              color:colors(name)
+            )
           )
-        )
       )
     `)
     .eq("id", id)
@@ -53,6 +56,27 @@ export default async function OrderDetailsPage(props: OrderDetailsPageProps) {
   // Handle old records safely
   const contactInfo = typeof order.contact_info === 'string' ? JSON.parse(order.contact_info) : order.contact_info;
   const shippingAddress = typeof order.shipping_address === 'string' ? JSON.parse(order.shipping_address) : order.shipping_address;
+
+  const formattedItems = (order.order_items || []).map((item: any) => {
+    const variantData = Array.isArray(item.variant) ? item.variant[0] : item.variant;
+    const productData = Array.isArray(item.product) ? item.product[0] : item.product;
+    
+    return {
+      ...item,
+      variant: variantData ? {
+        ...variantData,
+        color: variantData.color?.name || null,
+        size: variantData.size?.name || null,
+      } : null,
+      product: productData ? {
+        ...productData,
+        product_images: (productData.product_images || []).map((img: any) => ({
+          ...img,
+          color: img.color?.name || null,
+        })),
+      } : null,
+    };
+  });
 
   return (
     <div className="space-y-8">
@@ -71,7 +95,7 @@ export default async function OrderDetailsPage(props: OrderDetailsPageProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 space-y-8">
           <div className="bg-surface p-6 md:p-8 rounded-DEFAULT border border-surface-container">
-            <OrderItemsList items={order.order_items} />
+            <OrderItemsList items={formattedItems} />
           </div>
           
           <ShippingInfoCard 

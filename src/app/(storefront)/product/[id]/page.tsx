@@ -18,18 +18,21 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       ),
       product_variants (
         id,
-        color,
-        size,
+        color_id,
+        size_id,
         stock,
         price,
-        compare_at_price
+        compare_at_price,
+        color:colors(name),
+        size:sizes(name)
       ),
       features,
       product_images (
         image_url,
         is_thumbnail,
         display_order,
-        color
+        color_id,
+        color:colors(name)
       )
     `)
     .eq("id", resolvedParams.id)
@@ -73,10 +76,17 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     title: product.name,
     price: `$${product.price.toLocaleString()}`,
     description: product.description,
-    images: (product.product_images || []), // Keeping objects to extract color later
-    colors: Array.from(new Set((product.product_variants || []).map((v: any) => v.color).filter(Boolean))),
-    sizes: Array.from(new Set((product.product_variants || []).map((v: any) => v.size).filter(Boolean))),
-    variants: product.product_variants || [],
+    images: (product.product_images || []).map((img: any) => ({
+      ...img,
+      color: img.color?.name || null
+    })),
+    colors: Array.from(new Set((product.product_variants || []).map((v: any) => v.color?.name).filter(Boolean))),
+    sizes: Array.from(new Set((product.product_variants || []).map((v: any) => v.size?.name).filter(Boolean))),
+    variants: (product.product_variants || []).map((v: any) => ({
+      ...v,
+      color: v.color?.name || null,
+      size: v.size?.name || null,
+    })),
     features: product.features || [],
     isWishlisted: userWishlist.includes(product.id),
   };

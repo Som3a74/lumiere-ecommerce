@@ -54,7 +54,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       name: product?.name || "",
       description: product?.description || "",

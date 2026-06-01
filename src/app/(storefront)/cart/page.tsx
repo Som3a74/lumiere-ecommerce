@@ -20,8 +20,10 @@ export default async function CartPage() {
       variant_id,
       variant:product_variants (
         id,
-        color,
-        size
+        color_id,
+        size_id,
+        color:colors(name),
+        size:sizes(name)
       ),
       product:products (
         id,
@@ -43,8 +45,8 @@ export default async function CartPage() {
     const variantData = Array.isArray(item.variant) ? item.variant[0] : item.variant;
     return {
       ...item,
-      color: variantData?.color || null,
-      size: variantData?.size || null,
+      color: variantData?.color?.name || null,
+      size: variantData?.size?.name || null,
     };
   });
 

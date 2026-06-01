@@ -14,7 +14,8 @@ interface ProductImage {
   image_url: string;
   is_thumbnail: boolean;
   display_order: number;
-  color: string | null;
+  color_id: string | null;
+  color?: { name: string; hex_code: string | null };
 }
 
 interface Color {
@@ -34,7 +35,7 @@ export function ImageManager({ productId, images, colors }: ImageManagerProps) {
   const supabase = createClient();
   const [isPending, startTransition] = useTransition();
   const [file, setFile] = useState<File | null>(null);
-  const [color, setColor] = useState("");
+  const [colorId, setColorId] = useState("");
 
   const handleUpload = async () => {
     if (!file) return;
@@ -62,7 +63,7 @@ export function ImageManager({ productId, images, colors }: ImageManagerProps) {
           .insert({
             product_id: productId,
             image_url: imageUrl,
-            color: (color && color !== "none") ? color : null,
+            color_id: (colorId && colorId !== "none") ? colorId : null,
             display_order: images.length,
             is_thumbnail: images.length === 0, // First image is thumbnail
           });
@@ -71,7 +72,7 @@ export function ImageManager({ productId, images, colors }: ImageManagerProps) {
 
         toast.success("Image uploaded successfully");
         setFile(null);
-        setColor("");
+        setColorId("");
         router.refresh();
       } catch (error: any) {
         toast.error(error.message || "Failed to upload image");
@@ -110,7 +111,7 @@ export function ImageManager({ productId, images, colors }: ImageManagerProps) {
               
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2">
                 <span className="text-white text-xs font-medium uppercase tracking-wider bg-black/50 px-2 py-1 self-start">
-                  {img.color || "Base"}
+                  {img.color?.name || "Base"}
                 </span>
                 <Button
                   variant="ghost"
@@ -145,14 +146,14 @@ export function ImageManager({ productId, images, colors }: ImageManagerProps) {
             </div>
             <div className="flex-1">
               <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-widest mb-2">Link to Color (Optional)</label>
-              <Select onValueChange={setColor} value={color}>
+              <Select onValueChange={setColorId} value={colorId}>
                 <SelectTrigger className="rounded-none focus-visible:ring-primary h-10 bg-background">
                   <SelectValue placeholder="Select Color" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
                   {colors.map(c => (
-                    <SelectItem key={c.id} value={c.name}>
+                    <SelectItem key={c.id} value={c.id}>
                       <div className="flex items-center gap-2">
                         {c.hex_code && <div className="w-3 h-3 rounded-full border border-outline-variant/30" style={{ backgroundColor: c.hex_code.startsWith('#') ? c.hex_code : `#${c.hex_code}` }} />}
                         {c.name}

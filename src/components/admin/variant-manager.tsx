@@ -10,11 +10,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 interface Variant {
   id: string;
-  color: string;
-  size: string;
+  color_id: string | null;
+  size_id: string | null;
   stock: number;
   sku: string;
   price: number | null;
+  color?: { name: string; hex_code: string | null };
+  size?: { name: string };
 }
 
 interface Color {
@@ -88,8 +90,8 @@ export function VariantManager({ productId, variants, colors, sizes }: VariantMa
               <tbody className="divide-y divide-outline-variant/10">
                 {variants.map((variant) => (
                   <tr key={variant.id} className="hover:bg-surface-variant/10 transition-colors">
-                    <td className="py-3 px-4 text-primary font-medium">{variant.color}</td>
-                    <td className="py-3 px-4 text-primary">{variant.size}</td>
+                    <td className="py-3 px-4 text-primary font-medium">{variant.color?.name || '-'}</td>
+                    <td className="py-3 px-4 text-primary">{variant.size?.name || '-'}</td>
                     <td className="py-3 px-4 text-primary">{variant.stock}</td>
                     <td className="py-3 px-4 text-on-surface-variant font-mono text-xs">{variant.sku}</td>
                     <td className="py-3 px-4 text-primary">{variant.price ? `$${variant.price}` : '-'}</td>
@@ -118,13 +120,13 @@ export function VariantManager({ productId, variants, colors, sizes }: VariantMa
         <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
           <div className="md:col-span-1">
             <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-widest mb-2">Color</label>
-            <Select name="color" required>
+            <Select name="color_id" required>
               <SelectTrigger className="rounded-none focus-visible:ring-primary bg-background">
                 <SelectValue placeholder="Color" />
               </SelectTrigger>
               <SelectContent>
                 {colors.map(c => (
-                  <SelectItem key={c.id} value={c.name}>
+                  <SelectItem key={c.id} value={c.id}>
                     <div className="flex items-center gap-2">
                       {c.hex_code && <div className="w-3 h-3 rounded-full border border-outline-variant/30" style={{ backgroundColor: c.hex_code.startsWith('#') ? c.hex_code : `#${c.hex_code}` }} />}
                       {c.name}
@@ -136,13 +138,13 @@ export function VariantManager({ productId, variants, colors, sizes }: VariantMa
           </div>
           <div className="md:col-span-1">
             <label className="block text-xs font-medium text-on-surface-variant uppercase tracking-widest mb-2">Size</label>
-            <Select name="size">
+            <Select name="size_id">
               <SelectTrigger className="rounded-none focus-visible:ring-primary h-10 w-full bg-transparent">
                 <SelectValue placeholder="Size" />
               </SelectTrigger>
               <SelectContent>
                 {sizes.map(size => (
-                  <SelectItem key={size.id} value={size.name}>
+                  <SelectItem key={size.id} value={size.id}>
                     {size.name}
                   </SelectItem>
                 ))}

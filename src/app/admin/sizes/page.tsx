@@ -12,7 +12,7 @@ export default async function AdminSizesPage() {
     .select("*")
     .order("created_at", { ascending: false });
 
-  const columns: Column[] = [
+  const columns: Column<any>[] = [
     {
       header: "Size Name",
       accessorKey: "name",

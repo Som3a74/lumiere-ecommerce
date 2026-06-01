@@ -46,7 +46,7 @@ export function CouponForm({ coupon }: CouponFormProps) {
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       code: coupon?.code || "",
       discount_percentage: coupon?.discount_percentage || 10,
