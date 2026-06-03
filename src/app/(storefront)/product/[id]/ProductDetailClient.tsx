@@ -11,6 +11,7 @@ import { addToCart } from "@/app/actions/cart";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { ReviewsSection } from "./ReviewsSection";
 
 export default function ProductDetailPage({ product, relatedProducts }: { product: any, relatedProducts: any[] }) {
   const [transformOrigin, setTransformOrigin] = useState("center center");
@@ -298,6 +299,16 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
             </AccordionItem>
           </Accordion>
         </div>
+      </section>
+
+      {/* Reviews Section */}
+      <section className="px-margin-mobile md:px-margin-desktop">
+        <ReviewsSection 
+          productId={product.id}
+          reviews={product.reviews || []}
+          averageRating={product.averageRating || 0}
+          totalReviews={product.totalReviews || 0}
+        />
       </section>
 
       {/* You May Also Like */}

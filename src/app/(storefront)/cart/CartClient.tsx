@@ -6,21 +6,47 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { removeCartItem, updateCartItemQuantity } from "@/app/actions/cart";
+import { applyCoupon, removeCoupon } from "@/app/actions/coupons";
+import { FloatingInput } from "@/components/ui/floating-input";
 import { toast } from "sonner";
 
 interface CartClientProps {
   cartItems: any[];
   totals: {
     subtotal: number;
+    discount: number;
     tax: number;
     total: number;
   };
+  coupon: any | null;
 }
 
-export default function CartClient({ cartItems, totals }: CartClientProps) {
+export default function CartClient({ cartItems, totals, coupon }: CartClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [pendingAction, setPendingAction] = useState<{ id: string, type: 'remove' | 'update' } | null>(null);
+  const [couponCode, setCouponCode] = useState("");
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+
+  const handleApplyCoupon = () => {
+    if (!couponCode) return;
+    setIsApplyingCoupon(true);
+    startTransition(async () => {
+      const result = await applyCoupon(couponCode);
+      if (result.success) toast.success(result.message);
+      else toast.error(result.message);
+      setIsApplyingCoupon(false);
+      setCouponCode("");
+    });
+  };
+
+  const handleRemoveCoupon = () => {
+    startTransition(async () => {
+      const result = await removeCoupon();
+      if (result.success) toast.success(result.message);
+      else toast.error(result.message);
+    });
+  };
 
   const handleRemove = (id: string) => {
     setPendingAction({ id, type: 'remove' });
@@ -137,6 +163,12 @@ export default function CartClient({ cartItems, totals }: CartClientProps) {
               <span>Subtotal</span>
               <span>${totals.subtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
+            {totals.discount > 0 && (
+              <div className="flex justify-between font-body-md text-secondary">
+                <span>Discount ({coupon?.code})</span>
+                <span className="text-primary">- ${totals.discount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+            )}
             <div className="flex justify-between font-body-md text-secondary">
               <span>Shipping</span>
               <span>Calculated at checkout</span>
@@ -149,6 +181,44 @@ export default function CartClient({ cartItems, totals }: CartClientProps) {
               <span>Total</span>
               <span>${totals.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
+          </div>
+
+          <div className="mb-8">
+            {coupon ? (
+              <div className="flex items-center justify-between border-b border-surface-container pb-2">
+                <div className="font-body-md text-primary">
+                  Coupon applied: <span className="font-headline-md">{coupon.code}</span>
+                </div>
+                <Button
+                  variant="link"
+                  onClick={handleRemoveCoupon}
+                  disabled={isPending}
+                  className="px-0 font-label-caps text-secondary hover:text-error uppercase tracking-widest disabled:opacity-50"
+                >
+                  Remove
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-end gap-4">
+                <div className="flex-grow">
+                  <FloatingInput
+                    id="coupon"
+                    label="Promo Code"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    disabled={isApplyingCoupon || isPending}
+                  />
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={handleApplyCoupon}
+                  disabled={!couponCode || isApplyingCoupon || isPending}
+                  className="rounded-none uppercase text-primary border-surface-container hover:bg-surface-container transition-colors font-label-caps tracking-widest"
+                >
+                  {isApplyingCoupon ? "Applying..." : "Apply"}
+                </Button>
+              </div>
+            )}
           </div>
 
           <Button

@@ -10,6 +10,7 @@ export function FiltersClient() {
 
   const currentCategory = searchParams.get("category") || "";
   const currentMaterial = searchParams.get("material") || "";
+  const currentPrice = searchParams.get("price") || "";
   const currentSort = searchParams.get("sort") || "newest";
 
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -64,6 +65,13 @@ export function FiltersClient() {
     { label: "Carbon", value: "carbon" },
   ];
 
+  const priceRanges = [
+    { label: "All Prices", value: "" },
+    { label: "Under $1,000", value: "under_1000" },
+    { label: "1,000 - $5,000", value: "1000_5000" },
+    { label: "Over $5,000", value: "over_5000" },
+  ];
+
   const sortOptions = [
     { label: "Newest", value: "newest" },
     { label: "Price: Low to High", value: "price_asc" },
@@ -71,12 +79,12 @@ export function FiltersClient() {
   ];
 
   return (
-    <div className="w-full md:w-auto flex items-center gap-6 border-b border-surface-container pb-4 relative" ref={dropdownRef}>
-      <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest hidden md:block">
+    <div className="w-full md:w-auto flex items-center gap-4 md:gap-6 border-b border-surface-container pb-3 relative" ref={dropdownRef}>
+      <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest hidden lg:block">
         Filter:
       </span>
 
-      <div className="flex gap-6 flex-wrap pb-2 flex-grow">
+      <div className="flex gap-4 md:gap-6 flex-wrap md:flex-nowrap items-center flex-grow">
         {/* Category Dropdown */}
         <div className="relative">
           <Button
@@ -123,6 +131,32 @@ export function FiltersClient() {
                   className={`w-full justify-start rounded-none px-4 py-2 text-xs hover:bg-surface-container-low transition-colors ${currentMaterial === mat.value ? "text-primary font-bold bg-surface-container-low" : "text-secondary"}`}
                 >
                   {mat.label}
+                </Button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Price Dropdown */}
+        <div className="relative">
+          <Button
+            variant="ghost"
+            onClick={() => toggleDropdown("price")}
+            className="text-xs text-primary flex items-center gap-2 whitespace-nowrap hover:text-secondary transition-colors hover:bg-transparent px-0"
+          >
+            {priceRanges.find(p => p.value === currentPrice)?.label || "Price"} <span className="material-symbols-outlined text-sm">{openDropdown === "price" ? "expand_less" : "expand_more"}</span>
+          </Button>
+
+          {openDropdown === "price" && (
+            <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-surface-container shadow-lg z-50 py-2">
+              {priceRanges.map((price) => (
+                <Button
+                  variant="ghost"
+                  key={price.label}
+                  onClick={() => handleFilterChange("price", price.value)}
+                  className={`w-full justify-start rounded-none px-4 py-2 text-xs hover:bg-surface-container-low transition-colors ${currentPrice === price.value ? "text-primary font-bold bg-surface-container-low" : "text-secondary"}`}
+                >
+                  {price.label}
                 </Button>
               ))}
             </div>

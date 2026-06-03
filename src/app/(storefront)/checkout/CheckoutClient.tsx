@@ -13,6 +13,8 @@ import { placeOrder } from "@/app/actions/checkout";
 import { useRouter } from "next/navigation";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { applyCoupon, removeCoupon } from "@/app/actions/coupons";
+import { useTransition } from "react";
 
 // Initialize Stripe outside of component to avoid recreating the object on every render
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string);
@@ -23,23 +25,49 @@ interface CheckoutClientProps {
     lastName: string;
     email: string;
     phone: string;
+    address?: string;
   };
   cartItems: any[];
   totals: {
     subtotal: number;
+    discount: number;
     tax: number;
     total: number;
   };
   clientSecret: string;
+  coupon: any | null;
 }
 
-function CheckoutForm({ userProfile, cartItems, totals }: Omit<CheckoutClientProps, "clientSecret">) {
+function CheckoutForm({ userProfile, cartItems, totals, coupon }: Omit<CheckoutClientProps, "clientSecret">) {
   const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
   
   const [openAccordion, setOpenAccordion] = useState<string>("contact-info");
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [couponCode, setCouponCode] = useState("");
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+
+  const handleApplyCoupon = () => {
+    if (!couponCode) return;
+    setIsApplyingCoupon(true);
+    startTransition(async () => {
+      const result = await applyCoupon(couponCode);
+      if (result.success) toast.success(result.message);
+      else toast.error(result.message);
+      setIsApplyingCoupon(false);
+      setCouponCode("");
+    });
+  };
+
+  const handleRemoveCoupon = () => {
+    startTransition(async () => {
+      const result = await removeCoupon();
+      if (result.success) toast.success(result.message);
+      else toast.error(result.message);
+    });
+  };
 
   // Omit card, exp, cvc from schema validation since Stripe Elements handles them
   const formOptions = {
@@ -49,10 +77,7 @@ function CheckoutForm({ userProfile, cartItems, totals }: Omit<CheckoutClientPro
       phone: userProfile.phone || "",
       fname: userProfile.firstName || "",
       lname: userProfile.lastName || "",
-      address: "",
-      city: "",
-      country: "",
-      zip: "",
+      address: userProfile.address || "",
     }
   };
   
@@ -78,9 +103,6 @@ function CheckoutForm({ userProfile, cartItems, totals }: Omit<CheckoutClientPro
     
     const shippingAddress = {
       address: data.address,
-      city: data.city,
-      country: data.country,
-      zip: data.zip,
     };
     
     // 1. Confirm Payment with Stripe
@@ -95,9 +117,9 @@ function CheckoutForm({ userProfile, cartItems, totals }: Omit<CheckoutClientPro
             phone: data.phone,
             address: {
               line1: data.address,
-              city: data.city,
-              country: data.country && data.country.trim().length === 2 ? data.country.trim().toUpperCase() : 'US',
-              postal_code: data.zip,
+              city: '',
+              country: 'US',
+              postal_code: '',
             }
           }
         }
@@ -119,7 +141,7 @@ function CheckoutForm({ userProfile, cartItems, totals }: Omit<CheckoutClientPro
         status: paymentIntent.status,
       };
 
-      const result = await placeOrder(cartItems, totals, contactInfo, shippingAddress, paymentInfo);
+      const result = await placeOrder(cartItems, totals, contactInfo, shippingAddress, paymentInfo, coupon?.id);
       
       setIsPlacingOrder(false);
       
@@ -178,12 +200,7 @@ function CheckoutForm({ userProfile, cartItems, totals }: Omit<CheckoutClientPro
                 <div className="flex flex-col gap-1"><FloatingInput id="fname" label="First Name" type="text" {...register("fname")} />{errors.fname && <span className="text-red-500 text-sm">{errors.fname?.message as string}</span>}</div>
                 <div className="flex flex-col gap-1"><FloatingInput id="lname" label="Last Name" type="text" {...register("lname")} />{errors.lname && <span className="text-red-500 text-sm">{errors.lname?.message as string}</span>}</div>
               </div>
-              <div className="flex flex-col gap-1"><FloatingInput id="address" label="Address" type="text" {...register("address")} />{errors.address && <span className="text-red-500 text-sm">{errors.address?.message as string}</span>}</div>
-              <div className="flex flex-col gap-1"><FloatingInput id="city" label="City" type="text" {...register("city")} />{errors.city && <span className="text-red-500 text-sm">{errors.city?.message as string}</span>}</div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex flex-col gap-1"><FloatingInput id="country" label="Country (e.g. US)" type="text" {...register("country")} />{errors.country && <span className="text-red-500 text-sm">{errors.country?.message as string}</span>}</div>
-                <div className="flex flex-col gap-1"><FloatingInput id="zip" label="Postal Code" type="text" {...register("zip")} />{errors.zip && <span className="text-red-500 text-sm">{errors.zip?.message as string}</span>}</div>
-              </div>
+              <div className="flex flex-col gap-1"><FloatingInput id="address" label="Full Address" type="text" {...register("address")} />{errors.address && <span className="text-red-500 text-sm">{errors.address?.message as string}</span>}</div>
               <div className="flex justify-end">
                 <Button
                   variant="default"
@@ -270,6 +287,12 @@ function CheckoutForm({ userProfile, cartItems, totals }: Omit<CheckoutClientPro
               <span>Subtotal</span>
               <span>${totals.subtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
+            {totals.discount > 0 && (
+              <div className="flex justify-between font-body-md text-secondary">
+                <span>Discount ({coupon?.code})</span>
+                <span className="text-primary">- ${totals.discount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+            )}
             <div className="flex justify-between font-body-md text-secondary">
               <span>Shipping</span>
               <span>Complimentary</span>
@@ -283,13 +306,54 @@ function CheckoutForm({ userProfile, cartItems, totals }: Omit<CheckoutClientPro
               <span>${totals.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
           </div>
+
+          <div className="mb-8">
+            {coupon ? (
+              <div className="flex items-center justify-between border-b border-surface-container pb-2">
+                <div className="font-body-md text-primary">
+                  Coupon applied: <span className="font-headline-md">{coupon.code}</span>
+                </div>
+                <Button
+                  variant="link"
+                  onClick={handleRemoveCoupon}
+                  disabled={isPending}
+                  className="px-0 font-label-caps text-secondary hover:text-error uppercase tracking-widest disabled:opacity-50"
+                  type="button"
+                >
+                  Remove
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-end gap-4">
+                <div className="flex-grow">
+                  <FloatingInput
+                    id="coupon"
+                    label="Promo Code"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    disabled={isApplyingCoupon || isPending}
+                  />
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={handleApplyCoupon}
+                  disabled={!couponCode || isApplyingCoupon || isPending}
+                  className="rounded-none uppercase text-primary border-surface-container hover:bg-surface-container transition-colors font-label-caps tracking-widest"
+                  type="button"
+                >
+                  {isApplyingCoupon ? "Applying..." : "Apply"}
+                </Button>
+              </div>
+            )}
+          </div>
+
           {/* CTA */}
           <Button
             variant="default"
             size="lg"
             type="submit"
             className="w-full rounded-none uppercase text-on-primary flex justify-center items-center gap-2"
-            disabled={cartItems.length === 0 || isPlacingOrder || !stripe || !elements}
+            disabled={cartItems.length === 0 || isPlacingOrder || !stripe || !elements || openAccordion !== "payment-method"}
           >
             <span className="text-surface material-symbols-outlined text-[18px]">
               {isPlacingOrder ? "hourglass_empty" : "lock"}
@@ -302,7 +366,7 @@ function CheckoutForm({ userProfile, cartItems, totals }: Omit<CheckoutClientPro
   );
 }
 
-export default function CheckoutClient({ userProfile, cartItems, totals, clientSecret }: CheckoutClientProps) {
+export default function CheckoutClient({ userProfile, cartItems, totals, clientSecret, coupon }: CheckoutClientProps) {
   if (!clientSecret) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
@@ -347,7 +411,7 @@ export default function CheckoutClient({ userProfile, cartItems, totals, clientS
 
   return (
     <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
-      <CheckoutForm userProfile={userProfile} cartItems={cartItems} totals={totals} />
+      <CheckoutForm userProfile={userProfile} cartItems={cartItems} totals={totals} coupon={coupon} />
     </Elements>
   );
 }

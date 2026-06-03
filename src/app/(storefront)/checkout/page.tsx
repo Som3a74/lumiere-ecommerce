@@ -2,9 +2,10 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import CheckoutClient from "./CheckoutClient";
 import Stripe from "stripe";
+import { getAppliedCoupon } from "@/app/actions/coupons";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2023-10-16" as any,
+  apiVersion: "2026-05-27.dahlia" as any,
 });
 
 export default async function CheckoutPage() {
@@ -21,6 +22,7 @@ export default async function CheckoutPage() {
     lastName: user?.user_metadata?.last_name || "",
     email: user?.email || "",
     phone: user?.user_metadata?.phone || "",
+    address: user?.user_metadata?.address || "",
   };
 
   // Fetch cart items
@@ -48,6 +50,9 @@ export default async function CheckoutPage() {
 
   const items = cartItems || [];
 
+  // Check for coupon
+  const coupon = await getAppliedCoupon();
+
   // Calculate Totals
   const subtotal = items.reduce((sum, item) => {
     // Note: product structure depending on foreign key setup might be an array if not a single relation,
@@ -57,12 +62,19 @@ export default async function CheckoutPage() {
     return sum + (price * item.quantity);
   }, 0);
 
+  let discount = 0;
+  if (coupon) {
+    discount = subtotal * (coupon.discount_percentage / 100);
+  }
+
+  const subtotalAfterDiscount = subtotal - discount;
   const taxRate = 0.08;
-  const tax = subtotal * taxRate;
-  const total = subtotal + tax;
+  const tax = subtotalAfterDiscount * taxRate;
+  const total = subtotalAfterDiscount + tax;
 
   const totals = {
     subtotal,
+    discount,
     tax,
     total,
   };
@@ -81,6 +93,7 @@ export default async function CheckoutPage() {
         },
         metadata: {
           userId: user.id,
+          couponId: coupon?.id || null,
         },
       });
       clientSecret = paymentIntent.client_secret || "";
@@ -89,5 +102,5 @@ export default async function CheckoutPage() {
     }
   }
 
-  return <CheckoutClient userProfile={userProfile} cartItems={items} totals={totals} clientSecret={clientSecret} />;
+  return <CheckoutClient userProfile={userProfile} cartItems={items} totals={totals} clientSecret={clientSecret} coupon={coupon} />;
 }

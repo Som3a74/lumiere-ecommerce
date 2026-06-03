@@ -11,6 +11,7 @@ export default async function CollectionsPage({ searchParams }: { searchParams: 
   const material = typeof resolvedParams.material === 'string' ? resolvedParams.material : null;
   const sort = typeof resolvedParams.sort === 'string' ? resolvedParams.sort : 'newest';
   const search = typeof resolvedParams.search === 'string' ? resolvedParams.search : null;
+  const price = typeof resolvedParams.price === 'string' ? resolvedParams.price : null;
 
   // Build the query
   let query = supabase
@@ -33,17 +34,28 @@ export default async function CollectionsPage({ searchParams }: { searchParams: 
   }
 
   if (category) {
-    if (category === 'Watches' || category === 'Timepieces') {
-      query = query.in('categories.name', ['Chronograph', 'Automatic', 'Tourbillon', 'Heritage']);
-    } else if (category === 'Bags' || category === 'Leather Goods') {
-      query = query.in('categories.name', ['Leather Goods', 'Tote']);
+    const catLower = category.toLowerCase();
+    if (catLower === 'watches' || catLower === 'timepieces') {
+      query = query.in('categories.name', ['Watches', 'Timepieces', 'Chronograph', 'Automatic', 'Tourbillon', 'Heritage']);
+    } else if (catLower === 'bags' || catLower === 'leather goods') {
+      query = query.in('categories.name', ['Bags', 'Leather Goods', 'Tote']);
     } else {
-      query = query.eq('categories.name', category);
+      query = query.ilike('categories.name', category);
     }
   }
 
   if (material) {
     query = query.ilike('description', `%${material}%`);
+  }
+
+  if (price) {
+    if (price === 'under_1000') {
+      query = query.lt('price', 1000);
+    } else if (price === '1000_5000') {
+      query = query.gte('price', 1000).lte('price', 5000);
+    } else if (price === 'over_5000') {
+      query = query.gt('price', 5000);
+    }
   }
 
   if (sort === 'price_asc') {
@@ -90,7 +102,7 @@ export default async function CollectionsPage({ searchParams }: { searchParams: 
   return (
     <div className="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 md:py-24">
       {/* Header & Filtering Area */}
-      <header className="mb-16 flex flex-col md:flex-row justify-between items-end gap-8">
+      <header className="mb-16 flex flex-col lg:flex-row justify-between items-center lg:items-end gap-8">
         <div className="max-w-2xl">
           <h1 className="font-headline-lg text-headline-lg md:font-display-lg md:text-display-lg text-primary mb-4">
             {category ? category : "Our Collection"}

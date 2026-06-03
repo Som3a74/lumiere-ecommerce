@@ -39,7 +39,7 @@ export function Header({ user, isAdmin }: { user?: any, isAdmin?: boolean }) {
   return (
     <>
       <header className="fixed top-0 w-full z-50 bg-white/90 dark:bg-primary/90 border-b border-surface-container backdrop-blur-md">
-        <div className="grid grid-cols-3 items-center w-full px-margin-mobile md:px-margin-desktop h-24 max-w-container-max mx-auto">
+        <div className="flex justify-between lg:grid lg:grid-cols-3 items-center w-full px-margin-mobile md:px-margin-desktop h-24 max-w-container-max mx-auto">
           {/* Left Navigation */}
           <div className="hidden lg:flex items-center justify-start overflow-hidden">
             <nav className="flex gap-4 lg:gap-8">
@@ -63,11 +63,8 @@ export function Header({ user, isAdmin }: { user?: any, isAdmin?: boolean }) {
             </nav>
           </div>
 
-          {/* Mobile Empty Left (to balance grid) */}
-          <div className="lg:hidden flex items-center justify-start"></div>
-
-          {/* Center Logo */}
-          <div className="flex justify-center items-center">
+          {/* Center/Left Logo */}
+          <div className="flex justify-start lg:justify-center items-center">
             <Link className="font-display-lg-mobile md:font-display-lg text-[28px] md:text-[36px] tracking-[0.15em] text-primary dark:text-surface-bright whitespace-nowrap" href="/">
               LUMIÈRE
             </Link>

@@ -3,17 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { 
-  LayoutDashboard, 
-  Package, 
-  Tags, 
-  TicketPercent, 
-  Settings, 
+import {
+  LayoutDashboard,
+  Package,
+  Tags,
+  TicketPercent,
+  Settings,
   LogOut,
   Palette,
   Ruler,
   Users,
-  ShoppingCart
+  ShoppingCart,
+  Star
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 
@@ -23,6 +24,7 @@ const navigation = [
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "Products", href: "/admin/products", icon: Package },
   { name: "Categories", href: "/admin/categories", icon: Tags },
+  { name: "Reviews", href: "/admin/reviews", icon: Star },
   { name: "Coupons", href: "/admin/coupons", icon: TicketPercent },
   { name: "Colors", href: "/admin/colors", icon: Palette },
   { name: "Sizes", href: "/admin/sizes", icon: Ruler },
@@ -41,7 +43,7 @@ export function AdminSidebar() {
   return (
     <div className="flex min-h-screen w-64 flex-col bg-surface border-r border-outline-variant/30">
       <div className="flex h-16 shrink-0 items-center px-6 border-b border-outline-variant/30 bg-surface-bright">
-        <Link href="/admin" className="font-heading text-xl uppercase tracking-widest text-primary">
+        <Link href="/" className="font-heading text-xl uppercase tracking-widest text-primary">
           Lumière Admin
         </Link>
       </div>

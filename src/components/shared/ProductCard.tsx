@@ -27,7 +27,7 @@ export function ProductCard({
 }: ProductCardProps) {
   return (
     <article className={cn("group cursor-pointer", className)}>
-      <div className="relative bg-surface-container-low mb-6 overflow-hidden aspect-[3/4]">
+      <div className="relative bg-surface-container-low mb-6 overflow-hidden aspect-3/4">
         <Link href={href} className="block w-full h-full">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -37,8 +37,8 @@ export function ProductCard({
           />
         </Link>
         {productId && (
-          <WishlistButton 
-            productId={productId} 
+          <WishlistButton
+            productId={productId}
             initialIsWishlisted={isWishlisted}
             className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 duration-300"
           />

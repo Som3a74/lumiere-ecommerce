@@ -1,7 +1,9 @@
 # Project Handoff & Status Report (Lumiere E-Commerce)
 
 ## 📌 Overview
+
 Lumiere is a modern, premium e-commerce web application built using:
+
 - **Framework**: Next.js (App Router)
 - **Database / Auth**: Supabase (PostgreSQL)
 - **Styling**: Tailwind CSS (Custom Design System, Vanilla CSS)
@@ -9,32 +11,38 @@ Lumiere is a modern, premium e-commerce web application built using:
 ---
 
 ## 🛠️ Recent Major Architectural Refactoring (Phase 1)
+
 We recently executed a massive database restructuring to align the project with production-ready, scalable e-commerce standards. The old denormalized schema (which used arrays for colors/sizes) was completely replaced.
 
 ### Database Schema Updates
-- **Product Variants (`product_variants`)**: Created to handle inventory professionally. 
+
+- **Product Variants (`product_variants`)**: Created to handle inventory professionally.
 - **Categories (`categories`)**: Replaced the old text-based category column.
 - **Order Items & Cart (`order_items`, `cart_items`)**: Now strictly linked to a specific `variant_id`.
 - **Orders (`orders`)**: Status converted to a Postgres `ENUM`. Added `coupon_id`.
-- **Soft Deletes**: Added `deleted_at` to `products`. 
+- **Soft Deletes**: Added `deleted_at` to `products`.
   > **⚠️ IMPORTANT QUERY RULE FOR FUTURE AGENTS:** Because of the soft-delete architecture, **NEVER** query the `products` table without appending `.is('deleted_at', null)`. If you fetch products for a Carousel, Collection, Search, or Admin count, you MUST filter out soft-deleted products, otherwise they will appear on the site as if they are active.
 
 ---
 
 ## 🎨 Admin Dashboard & UI Polish (Phase 2)
+
 A massive upgrade was done to the Admin Dashboard to ensure it matches the "Quiet Luxury" aesthetic and offers complete control over the store:
 
 ### 1. UI Components Refactor
+
 - Rewrote core Shadcn UI components (`Button`, `Select`, `DropdownMenu`) to natively support the custom design system (sharp corners, uppercase, wide tracking, custom `bg-surface`). No more messy tailwind class chains.
 - Added smooth Skeleton Loaders across all admin pages.
 
 ### 2. Full Admin CRUD Implementation
+
 - **Products & Variants**: Fully functional Creation and Edit pages. Variants now dynamically load Colors and Sizes from the DB into `<Select>` dropdowns to prevent typos.
 - **Colors & Sizes Management**: Created dedicated database tables (`colors`, `sizes`) and full CRUD pages (`/admin/colors`, `/admin/sizes`) to manage them.
 - **Images**: Fixed image uploading in `VariantManager` to easily link an uploaded image to a specific color variant.
 - **Users Management**: Built a complete user management system (`/admin/users`) using the **Supabase Admin API** (requires `SUPABASE_SERVICE_ROLE_KEY`). Allows creating, editing (passwords/names), changing roles (admin/customer), and securely deleting users from `auth.users` and `public.profiles`.
 
 ## 💰 Phase 3: Payment & Order Management
+
 - **Stripe Integration**: Fully integrated Stripe `<PaymentElement>` for secure, one-off checkout payments.
   - Built a custom Next.js Server Action (`placeOrder`) that securely verifies the `paymentIntent` status on the backend before finalizing the order in Supabase.
   - Replaced the dummy checkout with an elegant, "Quiet Luxury" compliant Stripe Elements form.
@@ -44,20 +52,38 @@ A massive upgrade was done to the Admin Dashboard to ensure it matches the "Quie
   - Admins can view all orders, see full payment details, and dynamically change order statuses (Pending, Processing, Shipped, Delivered, Cancelled).
   - Bypassed RLS on the `payments` table for Admins securely by utilizing the `Supabase Service Role Key` for backend fetches.
 
-## 📊 Phase 4: Dashboard Redesign & UI Fixes (Just Completed)
-- **Dashboard Redesign**: 
+## 📊 Phase 4: Dashboard Redesign & UI Fixes
+
+- **Dashboard Redesign**:
   - Revamped the main Admin Dashboard (`/admin`) using `shadcn/ui` and `recharts` to display dynamic Revenue and Category distribution.
   - Extracted clean, reusable dashboard components (`DashboardCard`, `DashboardCharts`) without aggressive borders, relying on subtle shadows and spacing.
 - **Performance & UX (Skeleton Loading)**:
-  - Implemented Skeleton Loading and React `<Suspense>` across the admin panel. 
+  - Implemented Skeleton Loading and React `<Suspense>` across the admin panel.
   - Fixed an issue where the main dashboard skeleton bled into nested pages (like `/admin/orders`) by creating dedicated `loading.tsx` files for sub-routes.
 - **Storefront Fixes (Soft Deletes)**:
   - Fixed a critical bug where soft-deleted products (`deleted_at IS NOT NULL`) were still appearing on the public website. Filtered them out of `/collections`, `/product/[id]`, and the global `SearchModal`.
 
 ---
 
+## ⭐ Phase 5: Storefront Polish, Coupons & Reviews (Just Completed)
+
+- **Coupons / Discounts Logic**:
+  - Built minimal Coupon input fields on the Cart and Checkout pages to align with the Quiet Luxury aesthetic.
+  - Created secure Server Actions to validate active status and expiration dates, safely calculating the discount on the backend.
+  - Updated the Stripe Payment Intent to reflect the discounted amount and properly store the `coupon_id` within the `orders` table.
+- **Storefront Polish & Variants UI**:
+  - Enhanced the Product Details page to dynamically fetch and display accurate colors and sizes directly from `product_variants`.
+  - Upgraded the UI for size and color swatches (sharp corners, clear out-of-stock indicators).
+  - Ensured the "Add to Cart" function passes the precise `variant_id` to handle complex inventory properly.
+- **Reviews System**:
+  - **Customer Facing**: Developed the `ReviewsSection` for the product page. Users can leave a 1-5 star rating and comment using `lucide-react` golden stars. It displays the top 5 reviews by default with a smooth "Show all" expansion.
+  - **Admin Dashboard**: Created a protected `/admin/reviews` route to list all reviews across the store. Includes smooth Skeleton Loading and a secure "Delete" (Trash) action to moderate offensive content.
+
+---
+
 ## 🗄️ Database Schema Reference
-*Warning: This schema is for context only and is not meant to be run. Table order and constraints may not be valid for execution.*
+
+_Warning: This schema is for context only and is not meant to be run. Table order and constraints may not be valid for execution._
 
 ```sql
 CREATE TABLE public.profiles (
@@ -216,12 +242,34 @@ CREATE TABLE public.sizes (
 
 ---
 
-## 🚀 Next Steps (Where to resume)
-The core shopping experience, secure Stripe checkout, and the Admin Dashboard are now completely functional! The next AI assistant should pick up from here to implement:
+---
 
-1. **Coupons / Discounts Logic**: 
-   - Ensure the logic to apply a coupon code at checkout works, validate it, and link it to the `coupon_id` in the `orders` table. Update the Cart and Checkout totals to reflect the discount dynamically.
-2. **User Facing Store Polish**:
-   - Ensure the store navigation, search, and filtering are correctly wired up with the new database structure and handle variant fetching (colors/sizes) properly.
-3. **Reviews System**:
-   - Implement the frontend UI for customers to leave reviews on products, and display the average star rating dynamically.
+## 📧 Phase 6: Email Notifications & UI Polish (Just Completed)
+
+- **Email Receipts (Nodemailer)**:
+  - Replaced the initial Resend sandbox setup with `nodemailer` to bypass free-tier domain verification limits.
+  - Emails are now sent securely via Gmail SMTP using `SMTP_EMAIL` and `SMTP_PASSWORD` environment variables.
+  - Built a stunning, fully-responsive "Quiet Luxury" HTML email template that dynamically injects the store's logo, maps over `cartItems` to generate an itemized receipt, and includes the user's shipping address.
+- **Checkout Flow Optimization**:
+  - Simplified the Stripe checkout form by removing redundant fields (`city`, `country`, `zip`) to keep the minimal aesthetic.
+  - Fixed a Stripe `IntegrationError` by ensuring the "Place Order" button remains disabled until the `<PaymentElement>` is fully mounted in the accordion.
+  - Adjusted the `stripe.confirmPayment` payload to strictly satisfy Stripe's validation requirements for hidden fields.
+- **Layout & Responsive Fixes**:
+  - **Filters (`/collections`)**: Fixed a broken flex layout where dropdowns wrapped awkwardly. Applied `md:flex-nowrap` and `items-center` to ensure a single sleek line on desktop while retaining vertical alignment.
+  - **Header (`Header.tsx`)**: Rebuilt the layout logic to use `flex justify-between` on mobile (pushing the Logo to the far left and icons to the far right), while preserving the perfectly centered `lg:grid-cols-3` layout on large screens.
+  - **My Account**: Cleaned up the `/my-account` page by removing broken wishlist previews and obsolete fetches.
+
+---
+
+## 🚀 Next Steps (Where to resume)
+
+The core shopping experience, secure Stripe checkout, email confirmations, the Admin Dashboard, and responsive layouts are now completely functional! The next AI assistant should pick up from here to implement **Phase 7**:
+
+1. **User Profile & Order History Polish**:
+   - Ensure the customer's `/my-account` page elegantly displays their previous orders, a functional wishlist, and allows them to manage their shipping details smoothly.
+2. **Search & Filtering Upgrades**:
+   - Enhance the `/collections` page and search modal with robust filtering (by price range, color, category) while respecting the soft-delete rules.
+3. **Admin Order Status Emails**:
+   - Extend the `nodemailer` setup so that when an Admin changes an order status to "Shipped" or "Delivered" from the Dashboard, a branded update email is automatically sent to the customer.
+4. **SEO & Performance Optimization**:
+   - Finalize metadata, OpenGraph tags, and sitemaps for all dynamic product pages to ensure high search engine rankings for the luxury timepieces.
