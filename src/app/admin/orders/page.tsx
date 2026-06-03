@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 export const dynamic = "force-dynamic";
 
 export default async function AdminOrdersPage() {
-  const { data: orders, success } = await getAdminOrders();
+  const { data: orders, success, error } = await getAdminOrders();
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -32,7 +32,10 @@ export default async function AdminOrdersPage() {
               {!success || orders.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="p-8 text-center text-secondary">
-                    No orders found.
+                    {error ? (
+                      <div className="text-red-500 font-bold mb-2">Database Error: {error}</div>
+                    ) : null}
+                    {error ? "Please check your Supabase connection or table schema." : "No orders found."}
                   </td>
                 </tr>
               ) : (

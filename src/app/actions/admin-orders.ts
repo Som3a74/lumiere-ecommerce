@@ -33,7 +33,7 @@ export async function getAdminOrders() {
 
   if (error) {
     console.error("Error fetching admin orders:", error);
-    return { success: false, data: [] };
+    return { success: false, data: [], error: error.message };
   }
 
   return { success: true, data: orders || [] };
