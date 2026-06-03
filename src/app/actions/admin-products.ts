@@ -70,15 +70,15 @@ export async function addVariant(formData: FormData) {
   const supabase = await createClient();
   
   const product_id = formData.get("product_id") as string;
-  const color_id = formData.get("color_id") as string;
-  const size_id = formData.get("size_id") as string;
+  const color_id = (formData.get("color_id") as string) || null;
+  const size_id = (formData.get("size_id") as string) || null;
   const stock = parseInt(formData.get("stock") as string);
   const sku = formData.get("sku") as string;
   const priceRaw = formData.get("price");
   const price = priceRaw ? parseFloat(priceRaw as string) : null;
   
-  if (!product_id || !color_id || !size_id || isNaN(stock) || !sku) {
-    throw new Error("Missing required variant fields");
+  if (!product_id || isNaN(stock) || !sku) {
+    return { error: "Missing required variant fields" };
   }
 
   const { error } = await supabase
@@ -92,7 +92,7 @@ export async function addVariant(formData: FormData) {
       price
     });
     
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   revalidatePath(`/admin/products/${product_id}/edit`);
 }
@@ -105,7 +105,7 @@ export async function deleteVariant(variantId: string, productId: string) {
     .delete()
     .eq('id', variantId);
     
-  if (error) throw new Error(error.message);
+  if (error) return { error: error.message };
 
   revalidatePath(`/admin/products/${productId}/edit`);
 }

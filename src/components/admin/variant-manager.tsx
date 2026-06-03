@@ -47,9 +47,13 @@ export function VariantManager({ productId, variants, colors, sizes }: VariantMa
     
     startTransition(async () => {
       try {
-        await addVariant(formData);
-        toast.success("Variant added successfully");
-        (e.target as HTMLFormElement).reset();
+        const res = await addVariant(formData);
+        if (res?.error) {
+          toast.error(res.error);
+        } else {
+          toast.success("Variant added successfully");
+          (e.target as HTMLFormElement).reset();
+        }
       } catch (error: any) {
         toast.error(error.message || "Failed to add variant");
       }
@@ -59,8 +63,12 @@ export function VariantManager({ productId, variants, colors, sizes }: VariantMa
   const handleDelete = async (variantId: string) => {
     startTransition(async () => {
       try {
-        await deleteVariant(variantId, productId);
-        toast.success("Variant deleted successfully");
+        const res = await deleteVariant(variantId, productId);
+        if (res?.error) {
+          toast.error(res.error);
+        } else {
+          toast.success("Variant deleted successfully");
+        }
       } catch (error: any) {
         toast.error(error.message || "Failed to delete variant");
       }
