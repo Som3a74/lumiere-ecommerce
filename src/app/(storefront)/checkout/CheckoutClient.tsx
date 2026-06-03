@@ -42,7 +42,7 @@ function CheckoutForm({ userProfile, cartItems, totals, coupon }: Omit<CheckoutC
   const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
-  
+
   const [openAccordion, setOpenAccordion] = useState<string>("contact-info");
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -71,16 +71,19 @@ function CheckoutForm({ userProfile, cartItems, totals, coupon }: Omit<CheckoutC
 
   // Omit card, exp, cvc from schema validation since Stripe Elements handles them
   const formOptions = {
-    resolver: zodResolver(checkoutSchema.omit({ card: true, exp: true, cvc: true })),
+    resolver: zodResolver(checkoutSchema),
     defaultValues: {
       email: userProfile.email || "",
       phone: userProfile.phone || "",
       fname: userProfile.firstName || "",
       lname: userProfile.lastName || "",
       address: userProfile.address || "",
+      city: "",
+      country: "",
+      postalCode: "",
     }
   };
-  
+
   const { register, handleSubmit, formState: { errors } } = useForm(formOptions);
 
   const nextStep = (id: string) => {
@@ -93,18 +96,21 @@ function CheckoutForm({ userProfile, cartItems, totals, coupon }: Omit<CheckoutC
     }
 
     setIsPlacingOrder(true);
-    
+
     const contactInfo = {
       email: data.email,
       phone: data.phone,
       firstName: data.fname,
       lastName: data.lname,
     };
-    
+
     const shippingAddress = {
       address: data.address,
+      city: data.city,
+      country: data.country,
+      postalCode: data.postalCode,
     };
-    
+
     // 1. Confirm Payment with Stripe
     const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
       elements,
@@ -117,9 +123,9 @@ function CheckoutForm({ userProfile, cartItems, totals, coupon }: Omit<CheckoutC
             phone: data.phone,
             address: {
               line1: data.address,
-              city: '',
-              country: 'US',
-              postal_code: '',
+              city: data.city,
+              country: data.country,
+              postal_code: data.postalCode,
             }
           }
         }
@@ -142,9 +148,9 @@ function CheckoutForm({ userProfile, cartItems, totals, coupon }: Omit<CheckoutC
       };
 
       const result = await placeOrder(cartItems, totals, contactInfo, shippingAddress, paymentInfo, coupon?.id);
-      
+
       setIsPlacingOrder(false);
-      
+
       if (result.success) {
         toast.success(result.message);
         router.push("/my-account");
@@ -200,7 +206,12 @@ function CheckoutForm({ userProfile, cartItems, totals, coupon }: Omit<CheckoutC
                 <div className="flex flex-col gap-1"><FloatingInput id="fname" label="First Name" type="text" {...register("fname")} />{errors.fname && <span className="text-red-500 text-sm">{errors.fname?.message as string}</span>}</div>
                 <div className="flex flex-col gap-1"><FloatingInput id="lname" label="Last Name" type="text" {...register("lname")} />{errors.lname && <span className="text-red-500 text-sm">{errors.lname?.message as string}</span>}</div>
               </div>
-              <div className="flex flex-col gap-1"><FloatingInput id="address" label="Full Address" type="text" {...register("address")} />{errors.address && <span className="text-red-500 text-sm">{errors.address?.message as string}</span>}</div>
+              <div className="flex flex-col gap-1"><FloatingInput id="address" label="Street Address" type="text" {...register("address")} />{errors.address && <span className="text-red-500 text-sm">{errors.address?.message as string}</span>}</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="flex flex-col gap-1 md:col-span-1"><FloatingInput id="city" label="City" type="text" {...register("city")} />{errors.city && <span className="text-red-500 text-sm">{errors.city?.message as string}</span>}</div>
+                <div className="flex flex-col gap-1 md:col-span-1"><FloatingInput id="country" label="Country (e.g. US)" type="text" maxLength={2} {...register("country")} />{errors.country && <span className="text-red-500 text-sm">{errors.country?.message as string}</span>}</div>
+                <div className="flex flex-col gap-1 md:col-span-1"><FloatingInput id="postalCode" label="Postal Code" type="text" {...register("postalCode")} />{errors.postalCode && <span className="text-red-500 text-sm">{errors.postalCode?.message as string}</span>}</div>
+              </div>
               <div className="flex justify-end">
                 <Button
                   variant="default"
@@ -221,7 +232,7 @@ function CheckoutForm({ userProfile, cartItems, totals, coupon }: Omit<CheckoutC
               3. Payment Method
             </AccordionTrigger>
             <AccordionContent className="pt-4 space-y-6 min-h-[250px]">
-              <PaymentElement 
+              <PaymentElement
                 options={{
                   layout: "tabs",
                   fields: {

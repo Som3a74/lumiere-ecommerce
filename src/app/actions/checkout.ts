@@ -169,7 +169,7 @@ export async function placeOrder(
 
             <div style="background-color: #fcfcfc; padding: 20px; border: 1px solid #f0f0f0; margin-bottom: 30px;">
               <p style="margin: 0 0 10px 0;"><strong>Order Reference:</strong> #${order.id.split('-')[0].toUpperCase()}</p>
-              <p style="margin: 0 0 10px 0;"><strong>Shipping Address:</strong> ${shippingAddress.address}</p>
+              <p style="margin: 0 0 10px 0;"><strong>Shipping Address:</strong> ${shippingAddress.address}, ${shippingAddress.city}, ${shippingAddress.postalCode}, ${shippingAddress.country}</p>
               <p style="margin: 0 0 10px 0;"><strong>Total Amount:</strong> $${totals.total.toLocaleString()}</p>
               <p style="margin: 0;"><strong>Status:</strong> Processing</p>
             </div>

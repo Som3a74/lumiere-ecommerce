@@ -126,10 +126,25 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
               <span className="material-symbols-outlined text-[18px]">local_shipping</span>
               Shipping Address
             </h2>
-            <div className="space-y-1 text-sm text-secondary">
-              <p>{shipping.address}</p>
-              <p>{shipping.city}, {shipping.zip}</p>
-              <p>{shipping.country}</p>
+            <div className="space-y-4 mt-2">
+              <div>
+                <p className="text-[11px] font-bold text-tertiary-fixed-dim uppercase tracking-widest mb-1">Street Address</p>
+                <p className="text-primary text-sm">{shipping.address || "N/A"}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[11px] font-bold text-tertiary-fixed-dim uppercase tracking-widest mb-1">City</p>
+                  <p className="text-primary text-sm">{shipping.city || "N/A"}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold text-tertiary-fixed-dim uppercase tracking-widest mb-1">Postal Code</p>
+                  <p className="text-primary text-sm">{shipping.postalCode || "N/A"}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-tertiary-fixed-dim uppercase tracking-widest mb-1">Country</p>
+                <p className="text-primary text-sm uppercase">{shipping.country || "N/A"}</p>
+              </div>
             </div>
           </div>
 

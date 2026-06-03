@@ -9,7 +9,7 @@ interface ShippingInfoCardProps {
     address: string;
     city: string;
     country: string;
-    zip: string;
+    postalCode: string;
   };
 }
 
@@ -40,10 +40,25 @@ export function ShippingInfoCard({ contactInfo, shippingAddress }: ShippingInfoC
           <h3 className="font-label-caps text-label-caps text-secondary uppercase tracking-widest mb-4">
             Address
           </h3>
-          <div className="space-y-1 font-body-md text-primary">
-            <p>{shippingAddress?.address}</p>
-            <p>{shippingAddress?.city}, {shippingAddress?.zip}</p>
-            <p>{shippingAddress?.country}</p>
+          <div className="space-y-4">
+            <div>
+              <p className="text-[11px] font-bold text-tertiary-fixed-dim uppercase tracking-widest mb-1">Street Address</p>
+              <p className="text-primary font-body-md">{shippingAddress?.address || "N/A"}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-[11px] font-bold text-tertiary-fixed-dim uppercase tracking-widest mb-1">City</p>
+                <p className="text-primary font-body-md">{shippingAddress?.city || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-tertiary-fixed-dim uppercase tracking-widest mb-1">Postal Code</p>
+                <p className="text-primary font-body-md">{shippingAddress?.postalCode || "N/A"}</p>
+              </div>
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-tertiary-fixed-dim uppercase tracking-widest mb-1">Country</p>
+              <p className="text-primary font-body-md uppercase">{shippingAddress?.country || "N/A"}</p>
+            </div>
           </div>
         </div>
       </div>
