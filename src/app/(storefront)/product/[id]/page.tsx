@@ -175,5 +175,39 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     isWishlisted: userWishlist.includes(p.id),
   }));
 
-  return <ProductDetailClient product={formattedProduct} relatedProducts={formattedRelated} />;
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: formattedProduct.title,
+    image: formattedProduct.images.map((img: any) => img.image_url),
+    description: formattedProduct.description,
+    sku: formattedProduct.id,
+    offers: {
+      '@type': 'Offer',
+      url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://lumiere.com'}/product/${formattedProduct.id}`,
+      priceCurrency: 'USD',
+      price: product.price,
+      availability: (product.product_variants || []).some((v: any) => v.stock > 0) 
+        ? 'https://schema.org/InStock' 
+        : 'https://schema.org/OutOfStock',
+    },
+  };
+  
+  if (formattedProduct.averageRating > 0) {
+    (jsonLd as any).aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: formattedProduct.averageRating,
+      reviewCount: formattedProduct.totalReviews,
+    };
+  }
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <ProductDetailClient product={formattedProduct} relatedProducts={formattedRelated} />
+    </>
+  );
 }

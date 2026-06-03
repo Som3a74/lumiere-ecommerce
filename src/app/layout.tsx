@@ -9,8 +9,26 @@ const playfairDisplayHeading = Playfair_Display({ subsets: ['latin'], variable: 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: "LUMIÈRE GENÈVE - Homepage",
+  title: {
+    template: "%s | LUMIÈRE GENÈVE",
+    default: "LUMIÈRE GENÈVE - Homepage",
+  },
   description: "The Art of Quiet Luxury. Precision engineering meets timeless elegance.",
+  openGraph: {
+    title: "LUMIÈRE GENÈVE",
+    description: "The Art of Quiet Luxury. Precision engineering meets timeless elegance.",
+    url: "https://lumiere-ecommerce.vercel.app",
+    siteName: "LUMIÈRE GENÈVE",
+    images: [
+      {
+        url: "/assets/images/logo.png",
+        width: 800,
+        height: 600,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

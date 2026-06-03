@@ -2,6 +2,27 @@ import Link from "next/link";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { createClient } from "@/utils/supabase/server";
 import { FiltersClient } from "./FiltersClient";
+import { Metadata } from "next";
+
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }): Promise<Metadata> {
+  const resolvedParams = await searchParams;
+  const category = typeof resolvedParams.category === 'string' ? resolvedParams.category : null;
+  
+  const title = category ? `${category} Collection` : "Our Collection";
+  const description = category 
+    ? `Explore our exclusive ${category} collection. Crafted with precision and elegance.`
+    : "Discover our collection of meticulously crafted pieces, where tradition meets contemporary elegance.";
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title: `${title} | LUMIÈRE GENÈVE`,
+      description,
+      url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://lumiere-ecommerce.vercel.app'}/collections${category ? `?category=${category}` : ''}`,
+    }
+  };
+}
 
 export default async function CollectionsPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const supabase = await createClient();
@@ -74,6 +95,17 @@ export default async function CollectionsPage({ searchParams }: { searchParams: 
     console.error("Error fetching products:", error);
   }
 
+  // Fetch categories for filter
+  const { data: categoriesData } = await supabase
+    .from("categories")
+    .select("name")
+    .order("name", { ascending: true });
+    
+  const dynamicCategories = (categoriesData || []).map(cat => ({
+    label: cat.name,
+    value: cat.name
+  }));
+
   // Fetch wishlist status
   const { data: { user } } = await supabase.auth.getUser();
   let userWishlist: string[] = [];
@@ -112,7 +144,7 @@ export default async function CollectionsPage({ searchParams }: { searchParams: 
           </p>
         </div>
 
-        <FiltersClient />
+        <FiltersClient dynamicCategories={dynamicCategories} />
       </header>
 
       {/* Product Grid */}

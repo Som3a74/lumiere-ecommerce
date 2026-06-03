@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
-export function FiltersClient() {
+export function FiltersClient({ dynamicCategories = [] }: { dynamicCategories?: { label: string, value: string }[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -49,12 +49,16 @@ export function FiltersClient() {
     setOpenDropdown(openDropdown === name ? null : name);
   };
 
-  const categories = [
+  const defaultCategories = [
     { label: "All Collections", value: "" },
     { label: "Watches", value: "Watches" },
     { label: "Bags & Leather", value: "Bags" },
     { label: "Heritage", value: "Heritage" },
   ];
+  
+  const categories = dynamicCategories.length > 0 
+    ? [{ label: "All Collections", value: "" }, ...dynamicCategories] 
+    : defaultCategories;
 
   const materials = [
     { label: "All Materials", value: "" },

@@ -62,8 +62,8 @@ export default async function WishlistPage() {
                   <h3 className="font-headline-md text-[20px] text-primary mb-2 hover:underline underline-offset-4 line-clamp-1">{item.title}</h3>
                 </Link>
                 <p className="font-body-md text-secondary mb-4">{item.price}</p>
-                <Link href="/checkout" className="w-full text-center mt-auto border border-primary text-primary py-3 font-label-caps text-label-caps tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-colors">
-                  Add to Cart
+                <Link href={`/product/${item.id}`} className="w-full text-center mt-auto border border-primary text-primary py-3 font-label-caps text-label-caps tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-colors">
+                  View Product
                 </Link>
               </div>
             </div>

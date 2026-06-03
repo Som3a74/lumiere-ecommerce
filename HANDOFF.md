@@ -261,15 +261,33 @@ CREATE TABLE public.sizes (
 
 ---
 
+## 🌟 Phase 7: SEO, Branding & User Polish (Just Completed)
+
+- **User Profile & Order History Polish**:
+  - Refined the `/my-account/wishlist` page. The "Add to Cart" button now directs users straight to the product details page (`/product/[id]`) so they can properly select their desired variant (size/color) before adding to their cart.
+- **Search & Filtering Upgrades**:
+  - Updated the `/collections` page to fetch categories dynamically from the database.
+  - The `FiltersClient` now receives these dynamic categories, removing the need for hardcoded filter arrays while perfectly maintaining the "Quiet Luxury" aesthetic.
+- **Admin Order Status Emails**:
+  - Integrated `nodemailer` directly into the `updateOrderStatus` Server Action (`actions/admin-orders.ts`).
+  - When an Admin changes an order status to **Shipped** or **Delivered**, a beautifully styled, branded HTML email is automatically triggered and sent to the customer to keep them updated on their purchase.
+- **Advanced SEO & Branding**:
+  - **JSON-LD Structured Data**: Injected `Product` schema into product pages (with dynamic pricing, inventory, and reviews) and `Organization/WebSite` schema into the homepage to ensure rich snippets in Google Search.
+  - **Dynamic Metadata**: The Collections page now dynamically updates its `<title>` and OpenGraph tags based on the selected category filter (e.g., "Watches Collection | LUMIÈRE GENÈVE").
+  - **Web App Manifest**: Added `manifest.ts` to improve mobile SEO and PWA compatibility.
+  - **Brand Assets**: Generated and applied a high-end, minimalist custom Logo (`logo.png`) and Favicon (`icon.png`) featuring a champagne gold "L" monogram inside a stark black circle, replacing the default Next.js branding.
+
+---
+
 ## 🚀 Next Steps (Where to resume)
 
-The core shopping experience, secure Stripe checkout, email confirmations, the Admin Dashboard, and responsive layouts are now completely functional! The next AI assistant should pick up from here to implement **Phase 7**:
+The application is highly functional, secure, styled, and SEO-optimized! The next AI assistant should pick up from here to implement **Phase 8 (Final Polish & Launch Prep)**:
 
-1. **User Profile & Order History Polish**:
-   - Ensure the customer's `/my-account` page elegantly displays their previous orders, a functional wishlist, and allows them to manage their shipping details smoothly.
-2. **Search & Filtering Upgrades**:
-   - Enhance the `/collections` page and search modal with robust filtering (by price range, color, category) while respecting the soft-delete rules.
-3. **Admin Order Status Emails**:
-   - Extend the `nodemailer` setup so that when an Admin changes an order status to "Shipped" or "Delivered" from the Dashboard, a branded update email is automatically sent to the customer.
-4. **SEO & Performance Optimization**:
-   - Finalize metadata, OpenGraph tags, and sitemaps for all dynamic product pages to ensure high search engine rankings for the luxury timepieces.
+1. **Analytics & Tracking Integration**:
+   - Integrate Google Analytics, Vercel Web Analytics, or PostHog to track user behavior, checkout drop-offs, and conversion rates.
+2. **Performance Auditing**:
+   - Run Lighthouse audits to ensure images are perfectly optimized (`next/image` usage check) and font loading is non-blocking.
+3. **Advanced Product Search**:
+   - Upgrade the current text-based search to use a robust, typo-tolerant search solution (e.g., Supabase Vector/pgvector for semantic search, or Algolia).
+4. **Production Deployment**:
+   - Finalize environment variables, connect a custom domain, and handle final Vercel deployment checks.
