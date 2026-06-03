@@ -7,7 +7,7 @@ export default async function MyAccountLayout({ children }: { children: React.Re
 
   const firstName = user?.user_metadata?.first_name || "";
   const lastName = user?.user_metadata?.last_name || "";
-  
+
   // Create a display name (fallback to "Guest" if none exists)
   const displayName = [firstName, lastName].filter(Boolean).join(" ") || "Guest";
 

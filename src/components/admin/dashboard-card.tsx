@@ -14,7 +14,7 @@ interface DashboardCardProps {
 
 export function DashboardCard({ title, value, icon, description, trend }: DashboardCardProps) {
   return (
-    <Card className="rounded-none border-outline-variant/50 shadow-sm bg-surface">
+    <Card className="border-outline-variant/50 shadow-sm bg-surface">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium uppercase tracking-widest text-on-surface-variant">
           {title}

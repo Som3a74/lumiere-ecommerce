@@ -19,7 +19,7 @@ const chartConfig = {
 
 export function RevenueChart({ data }: RevenueChartProps) {
   return (
-    <Card className="rounded-none border-outline-variant/50 shadow-sm bg-surface">
+    <Card className="border-outline-variant/50 shadow-sm bg-surface">
       <CardHeader>
         <CardTitle className="font-heading text-xl font-medium tracking-tight text-primary">Revenue Overview</CardTitle>
         <CardDescription className="text-on-surface-variant">Monthly revenue for the current year</CardDescription>
