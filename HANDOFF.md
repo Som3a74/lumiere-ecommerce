@@ -279,9 +279,28 @@ CREATE TABLE public.sizes (
 
 ---
 
+## 🏆 Phase 8: Production Audit & Architecture Finalization (Just Completed)
+
+- **Database & Architecture Resiliency**:
+  - **UUID Generation Fallback**: Fixed a critical `invalid input syntax for type uuid` Postgres error by implementing a robust `crypto.randomUUID()` fallback generator in `product-form.tsx`. This ensures the app can generate valid UUIDs even in insecure environments (e.g., local network IP) where the browser disables native crypto APIs.
+  - **Upsert-Driven Product Saves**: Upgraded the `saveProduct` action (`admin-products.ts`) from a rigid `Insert` to a flexible `Upsert`. This prevents `duplicate key value violates unique constraint "products_pkey"` errors if a network timeout occurs and the user clicks "Save" multiple times.
+  - **Sales Tracking Integration**: Upgraded the `checkout.ts` server action to automatically increment the `sales_count` column inside the `products` table upon a successful Stripe payment. This guarantees accurate metrics for "Best Seller" sorting and analytics.
+
+- **Dynamic SKU Generation**:
+  - Resolved an issue where new products lacked an ID for SKU creation. Now, the frontend assigns a temporary `[AUTO]` placeholder (e.g. `[AUTO]-RED-L`). Upon saving, the backend intercepts this, creates the product, fetches the real `product_id`, and seamlessly updates the SKU to a clean format (e.g., `PROD-A3D4-RED-L`).
+
+- **Checkout & Cart UX Precision**:
+  - **Variant-Specific Imagery**: Both the Cart (`/cart`) and Checkout (`/checkout`) pages now intelligently map the user's selected `variant_id` to the matching `color_id` inside `product_images`. Customers now see the **exact image** corresponding to the color they chose, rather than a generic product image.
+  - **Checkout Clarity**: The Checkout page now explicitly prints the selected variant string (e.g., `Red / Large`) beneath the product title to provide maximum clarity before payment.
+
+- **Admin UI Polish**:
+  - **Image Upload Button Fix**: Replaced the Shadcn `<Input type="file">` with a native HTML `<input type="file">` for variant image uploads. This bypassed Shadcn's default `disabled:opacity-50` styling, ensuring the native "Choose File" text remains 100% invisible (`opacity-0`) while the "Uploading..." spinner is active.
+
+---
+
 ## 🚀 Next Steps (Where to resume)
 
-The application is highly functional, secure, styled, and SEO-optimized! The next AI assistant should pick up from here to implement **Phase 8 (Final Polish & Launch Prep)**:
+The application is highly functional, secure, styled, SEO-optimized, and **Production Ready**! The next AI assistant should pick up from here to implement **Phase 9 (Final Polish & Launch Prep)**:
 
 1. **Analytics & Tracking Integration**:
    - Integrate Google Analytics, Vercel Web Analytics, or PostHog to track user behavior, checkout drop-offs, and conversion rates.

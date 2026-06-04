@@ -20,8 +20,12 @@ export function ProductActions({ productId }: ProductActionsProps) {
         try {
           await deleteProduct(productId);
           toast.success("Product deleted successfully");
-        } catch (error: any) {
-          toast.error(error.message || "Failed to delete product");
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            toast.error(error.message || "Failed to delete product");
+          } else {
+            toast.error("Failed to delete product");
+          }
         }
       });
     }

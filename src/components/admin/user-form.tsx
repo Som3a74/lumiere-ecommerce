@@ -32,8 +32,12 @@ export function UserForm({ user }: UserFormProps) {
         toast.success(user ? "User updated" : "User created");
         router.push("/admin/users");
         router.refresh();
-      } catch (error: any) {
-        toast.error(error.message || "Failed to save user");
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message || "Failed to save user");
+        } else {
+          toast.error("Failed to save user");
+        }
       }
     });
   }

@@ -95,7 +95,14 @@ export default function CartClient({ cartItems, totals, coupon }: CartClientProp
         <div className="space-y-8">
           {cartItems.map((item) => {
             const product = Array.isArray(item.product) ? item.product[0] : item.product;
-            const imageUrl = product?.product_images?.[0]?.image_url || "/placeholder-image.jpg";
+            
+            let matchingImages = product?.product_images || [];
+            if (item.color_id) {
+              const colorImages = matchingImages.filter((img: any) => img.color_id === item.color_id);
+              if (colorImages.length > 0) matchingImages = colorImages;
+            }
+            
+            const imageUrl = matchingImages[0]?.image_url || "/placeholder-image.jpg";
 
             return (
               <div key={item.id} className="flex flex-col sm:flex-row gap-6 pb-8 border-b border-surface-container">

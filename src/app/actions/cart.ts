@@ -11,7 +11,27 @@ export async function addToCart(productId: string, options?: { variantId?: strin
     return { error: "You must be logged in to add items to your cart" };
   }
 
-  // Check if item is already in cart with same product and variant
+  let variantStock: number | null = null;
+
+  if (options?.variantId) {
+    // 1. Verify variant exists and has stock
+    const { data: variant, error: variantError } = await supabase
+      .from("product_variants")
+      .select("stock")
+      .eq("id", options.variantId)
+      .single();
+
+    if (variantError || !variant) {
+      return { error: "Selected product variant not found" };
+    }
+
+    if (variant.stock <= 0) {
+      return { error: "This item is currently out of stock" };
+    }
+    variantStock = variant.stock;
+  }
+
+  // 2. Check if item is already in cart
   let existingQuery = supabase
     .from("cart_items")
     .select("id, quantity")
@@ -27,10 +47,15 @@ export async function addToCart(productId: string, options?: { variantId?: strin
   const { data: existingCartItem } = await existingQuery.single();
 
   if (existingCartItem) {
-    // Increment quantity
+    // Increment quantity, but check against stock limit if it's a variant-based product
+    const newQuantity = existingCartItem.quantity + 1;
+    if (variantStock !== null && newQuantity > variantStock) {
+      return { error: `Cannot add more. Only ${variantStock} items available in stock.` };
+    }
+
     const { error: updateError } = await supabase
       .from("cart_items")
-      .update({ quantity: existingCartItem.quantity + 1 })
+      .update({ quantity: newQuantity })
       .eq("id", existingCartItem.id);
 
     if (updateError) {
@@ -92,6 +117,30 @@ export async function updateCartItemQuantity(itemId: string, quantity: number) {
 
   if (quantity < 1) {
     return removeCartItem(itemId);
+  }
+
+  // Fetch the cart item to find its variant_id and check stock
+  const { data: cartItem, error: cartError } = await supabase
+    .from("cart_items")
+    .select("variant_id")
+    .eq("id", itemId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (cartError || !cartItem) {
+    return { error: "Cart item not found" };
+  }
+
+  if (cartItem.variant_id) {
+    const { data: variant } = await supabase
+      .from("product_variants")
+      .select("stock")
+      .eq("id", cartItem.variant_id)
+      .single();
+
+    if (variant && quantity > variant.stock) {
+      return { error: `Cannot update quantity. Only ${variant.stock} items available.` };
+    }
   }
 
   const { error } = await supabase

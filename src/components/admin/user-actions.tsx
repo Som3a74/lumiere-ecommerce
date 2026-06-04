@@ -20,8 +20,12 @@ export function UserActions({ userId }: UserActionsProps) {
         try {
           await deleteUser(userId);
           toast.success("User deleted successfully");
-        } catch (error: any) {
-          toast.error(error.message || "Failed to delete user");
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            toast.error(error.message || "Failed to delete user");
+          } else {
+            toast.error("Failed to delete user");
+          }
         }
       });
     }

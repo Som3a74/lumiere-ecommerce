@@ -9,6 +9,7 @@ const playfairDisplayHeading = Playfair_Display({ subsets: ['latin'], variable: 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://lumiere-ecommerce.vercel.app"),
   title: {
     template: "%s | LUMIÈRE GENÈVE",
     default: "LUMIÈRE GENÈVE - Homepage",

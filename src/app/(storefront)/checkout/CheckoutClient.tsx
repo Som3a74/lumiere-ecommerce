@@ -263,7 +263,13 @@ function CheckoutForm({ userProfile, cartItems, totals, coupon }: Omit<CheckoutC
               <p className="text-secondary font-body-md">Your cart is empty.</p>
             ) : (
               cartItems.map((item) => {
-                const imageUrl = item.product?.product_images?.[0]?.image_url || "/placeholder-image.jpg";
+                let matchingImages = item.product?.product_images || [];
+                if (item.color_id) {
+                  const colorImages = matchingImages.filter((img: any) => img.color_id === item.color_id);
+                  if (colorImages.length > 0) matchingImages = colorImages;
+                }
+                
+                const imageUrl = matchingImages[0]?.image_url || "/placeholder-image.jpg";
 
                 return (
                   <div key={item.id} className="flex gap-4">
@@ -280,7 +286,12 @@ function CheckoutForm({ userProfile, cartItems, totals, coupon }: Omit<CheckoutC
                         <h3 className="font-headline-md text-[18px] text-primary line-clamp-2">
                           {item.product?.name || "Unknown Product"}
                         </h3>
-                        <p className="font-body-md text-secondary text-sm">Qty: {item.quantity}</p>
+                        {(item.color || item.size) && (
+                          <p className="font-body-md text-secondary text-sm mt-1">
+                            {item.color}{item.color && item.size ? " / " : ""}{item.size}
+                          </p>
+                        )}
+                        <p className="font-body-md text-secondary text-sm mt-1">Qty: {item.quantity}</p>
                       </div>
                       <div className="font-body-lg text-primary">
                         ${(item.product?.price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

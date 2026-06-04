@@ -54,8 +54,12 @@ export function VariantManager({ productId, variants, colors, sizes }: VariantMa
           toast.success("Variant added successfully");
           (e.target as HTMLFormElement).reset();
         }
-      } catch (error: any) {
-        toast.error(error.message || "Failed to add variant");
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message || "Failed to add variant");
+        } else {
+          toast.error("Failed to add variant");
+        }
       }
     });
   };
@@ -69,8 +73,12 @@ export function VariantManager({ productId, variants, colors, sizes }: VariantMa
         } else {
           toast.success("Variant deleted successfully");
         }
-      } catch (error: any) {
-        toast.error(error.message || "Failed to delete variant");
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message || "Failed to delete variant");
+        } else {
+          toast.error("Failed to delete variant");
+        }
       }
     });
   };

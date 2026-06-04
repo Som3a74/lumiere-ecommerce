@@ -25,8 +25,12 @@ export function SizeForm({ size }: SizeFormProps) {
         toast.success(size ? "Size updated" : "Size created");
         router.push("/admin/sizes");
         router.refresh();
-      } catch (error: any) {
-        toast.error(error.message || "Failed to save size");
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message || "Failed to save size");
+        } else {
+          toast.error("Failed to save size");
+        }
       }
     });
   }

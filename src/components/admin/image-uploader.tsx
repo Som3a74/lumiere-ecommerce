@@ -2,10 +2,9 @@
 
 import React, { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { UploadCloud, X, Loader2 } from "lucide-react";
+import { UploadCloud, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 
 interface ImageUploaderProps {
   bucket: string;
@@ -32,7 +31,7 @@ export function ImageUploader({ bucket, onUploadSuccess, className }: ImageUploa
       const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from(bucket)
         .upload(filePath, file, {
           cacheControl: '3600',
@@ -47,9 +46,14 @@ export function ImageUploader({ bucket, onUploadSuccess, className }: ImageUploa
 
       toast.success("Image uploaded successfully");
       onUploadSuccess(publicUrl);
-    } catch (error: any) {
-      toast.error(error.message || "Error uploading image");
-      console.error(error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message || "Error uploading image");
+        console.error(error);
+      } else {
+        toast.error("Error uploading image");
+        console.error(error);
+      }
     } finally {
       setIsUploading(false);
       // Reset input

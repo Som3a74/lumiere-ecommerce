@@ -74,8 +74,12 @@ export function ImageManager({ productId, images, colors }: ImageManagerProps) {
         setFile(null);
         setColorId("");
         router.refresh();
-      } catch (error: any) {
-        toast.error(error.message || "Failed to upload image");
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message || "Failed to upload image");
+        } else {
+          toast.error("Failed to upload image");
+        }
       }
     });
   };
@@ -92,8 +96,12 @@ export function ImageManager({ productId, images, colors }: ImageManagerProps) {
         
         toast.success("Image deleted successfully");
         router.refresh();
-      } catch (error: any) {
-        toast.error(error.message || "Failed to delete image");
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message || "Failed to delete image");
+        } else {
+          toast.error("Failed to delete image");
+        }
       }
     });
   };

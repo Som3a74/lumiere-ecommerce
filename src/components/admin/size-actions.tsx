@@ -20,8 +20,12 @@ export function SizeActions({ sizeId }: SizeActionsProps) {
         try {
           await deleteSize(sizeId);
           toast.success("Size deleted successfully");
-        } catch (error: any) {
-          toast.error(error.message || "Failed to delete size");
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            toast.error(error.message || "Failed to delete size");
+          } else {
+            toast.error("Failed to delete size");
+          }
         }
       });
     }

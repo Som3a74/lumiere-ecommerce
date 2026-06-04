@@ -110,6 +110,44 @@ export async function placeOrder(
     return { success: false, message: "Payment succeeded but failed to save order items. Please contact support." };
   }
 
+  // 4.5 Deduct Stock
+  for (const item of cartItems) {
+    if (item.variant_id) {
+      // Fetch current stock
+      const { data: variantData } = await supabaseAdmin
+        .from('product_variants')
+        .select('stock')
+        .eq('id', item.variant_id)
+        .single();
+        
+      if (variantData) {
+        const newStock = Math.max(0, variantData.stock - item.quantity);
+        const { error: stockError } = await supabaseAdmin
+          .from('product_variants')
+          .update({ stock: newStock })
+          .eq('id', item.variant_id);
+          
+        if (stockError) console.error("Error deducting stock:", stockError);
+      }
+    }
+    
+    // Increment product sales_count
+    if (item.product_id) {
+      const { data: productInfo } = await supabaseAdmin
+        .from('products')
+        .select('sales_count')
+        .eq('id', item.product_id)
+        .single();
+        
+      if (productInfo) {
+        await supabaseAdmin
+          .from('products')
+          .update({ sales_count: (productInfo.sales_count || 0) + item.quantity })
+          .eq('id', item.product_id);
+      }
+    }
+  }
+
   // 5. Clear cart
   const { error: clearCartError } = await supabase
     .from("cart_items")

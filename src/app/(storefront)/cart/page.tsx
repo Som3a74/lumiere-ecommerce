@@ -31,6 +31,7 @@ export default async function CartPage() {
         price,
         product_images (
           image_url,
+          color_id,
           display_order
         )
       )
@@ -54,6 +55,7 @@ export default async function CartPage() {
       ...item,
       color: extractName(variantData?.color),
       size: extractName(variantData?.size),
+      color_id: variantData?.color_id || null,
     };
   });
 

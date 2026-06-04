@@ -25,7 +25,7 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
   // Group images by color
   const imagesByColor = colorsList.reduce((acc: Record<string, string[]>, color: string) => {
     // Find images that match this color, or default to all images if none specified
-    const colorImages = product.images.filter((img: any) => img.color === color).map((img: any) => img.image_url);
+    const colorImages = product.images.filter((img: any) => (img.color || "Platinum") === color).map((img: any) => img.image_url);
     acc[color] = colorImages.length > 0 ? colorImages : product.images.map((img: any) => img.image_url);
     if (acc[color].length === 0) acc[color] = ["/placeholder-image.jpg"];
     return acc;
@@ -40,23 +40,22 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
     setSelectedImage(imagesByColor[color]?.[0] || "/placeholder-image.jpg");
   };
 
-  const isColorOutOfStock = (colorName: string) => {
-    if (!product.variants || product.variants.length === 0) return false;
-    const variantsForColor = product.variants.filter((v: any) => v.color === colorName);
-    if (variantsForColor.length === 0) return false;
-    const totalStock = variantsForColor.reduce((sum: number, v: any) => sum + (v.stock || 0), 0);
-    return totalStock <= 0;
-  };
+  // Normalize variants so that variants with null color/size match the fallbacks
+  const normalizedVariants = (product.variants || []).map((v: any) => ({
+    ...v,
+    color: v.color || "Platinum",
+    size: v.size || "40mm",
+  }));
 
   const isSizeOutOfStockForColor = (sizeName: string, colorName: string) => {
-    if (!product.variants || product.variants.length === 0) return false;
-    const variant = product.variants.find((v: any) => v.color === colorName && v.size === sizeName);
-    if (!variant) return true; // Does not exist
+    if (normalizedVariants.length === 0) return true;
+    const variant = normalizedVariants.find((v: any) => v.color === colorName && v.size === sizeName);
+    if (!variant) return true;
     return (variant.stock || 0) <= 0;
   };
 
-  const currentVariant = product.variants?.find((v: any) => v.color === selectedColor && v.size === selectedSize) 
-                         || product.variants?.find((v: any) => v.color === selectedColor);
+  const currentVariant = normalizedVariants.find((v: any) => v.color === selectedColor && v.size === selectedSize) 
+                         || normalizedVariants.find((v: any) => v.color === selectedColor);
 
   const displayPrice = currentVariant?.price ? `$${currentVariant.price.toLocaleString()}` : product.price;
   const comparePrice = currentVariant?.compare_at_price ? `$${currentVariant.compare_at_price.toLocaleString()}` : null;
@@ -79,11 +78,7 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
 
   const handleAddToCart = () => {
     startTransition(async () => {
-      // Find the corresponding variant from product.variants
-      const variant = product.variants?.find(
-        (v: any) => v.color === selectedColor && v.size === selectedSize
-      );
-      const variantId = variant?.id || undefined;
+      const variantId = currentVariant?.id || undefined;
 
       const result = await addToCart(product.id, { variantId });
       if (result?.error) {
@@ -98,6 +93,12 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
         router.push("/cart");
       }
     });
+  };
+
+  const isCurrentVariantOutOfStock = () => {
+    if (normalizedVariants.length === 0) return true;
+    if (!currentVariant) return true;
+    return (currentVariant.stock || 0) <= 0;
   };
 
   return (
@@ -194,19 +195,18 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
             </p>
             <div className="flex gap-4">
               {colorsList.map((c: string, idx: number) => {
-                const outOfStock = isColorOutOfStock(c);
                 return (
                   <button
                     key={idx}
-                    onClick={() => !outOfStock && handleColorSelect(c)}
+                    onClick={() => handleColorSelect(c)}
                     aria-label={`Select ${c}`}
-                    disabled={outOfStock}
-                    className={`w-10 h-10 rounded-full border-2 relative overflow-hidden ${selectedColor === c ? "border-primary" : "border-transparent"} ${outOfStock ? "opacity-50 cursor-not-allowed hover:border-transparent" : "hover:border-surface-dim transition-colors"} shadow-sm`}
+                    className={`w-10 h-10 rounded-full border-2 relative overflow-hidden shadow-sm ${
+                      selectedColor === c 
+                        ? "border-primary" 
+                        : "border-transparent hover:border-surface-dim transition-colors"
+                    }`}
                     style={{ backgroundColor: getInlineColor(c) }}
                   >
-                    {outOfStock && (
-                      <span className="absolute w-[140%] h-[2px] bg-error -rotate-45 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"></span>
-                    )}
                   </button>
                 );
               })}
@@ -214,7 +214,7 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
           </div>
 
           {/* Sizes */}
-          <div className="mb-10">
+          <div className="mb-8">
             <p className="font-label-caps text-label-caps text-primary mb-4 uppercase">
               Size: <span className="text-secondary font-normal ml-2">{selectedSize}</span>
             </p>
@@ -226,16 +226,39 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
                     key={idx}
                     onClick={() => !outOfStock && setSelectedSize(s)}
                     disabled={outOfStock}
-                    className={`px-4 py-2 border relative overflow-hidden ${selectedSize === s ? "border-primary bg-primary text-on-primary" : "border-surface-container text-primary"} ${outOfStock ? "opacity-50 cursor-not-allowed bg-surface-dim text-secondary" : "hover:border-surface-dim transition-colors"} font-label-caps text-label-caps uppercase`}
+                    className={`px-4 py-2 border relative overflow-hidden font-label-caps text-label-caps uppercase ${
+                      outOfStock 
+                        ? "border-surface-container text-secondary opacity-50 cursor-not-allowed bg-surface-dim" 
+                        : selectedSize === s 
+                          ? "border-primary bg-primary text-on-primary" 
+                          : "border-surface-container text-primary hover:border-surface-dim transition-colors"
+                    }`}
                   >
-                    {s}
+                    <span className={outOfStock ? "opacity-40" : ""}>{s}</span>
                     {outOfStock && (
-                      <span className="absolute w-[120%] h-[1px] bg-error -rotate-12 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-70"></span>
+                      <>
+                        <span className="absolute w-[120%] h-[1px] bg-on-surface/40 -rotate-[20deg] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"></span>
+                        <span className="absolute w-[120%] h-[1px] bg-on-surface/40 rotate-[20deg] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"></span>
+                      </>
                     )}
                   </button>
                 );
               })}
             </div>
+          </div>
+
+          {/* Stock Info */}
+          <div className="mb-6 flex items-center">
+            {isCurrentVariantOutOfStock() ? (
+              <p className="font-body-md text-error flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-error"></span> Out of stock
+              </p>
+            ) : (
+              <p className="font-body-md text-secondary flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-success" style={{ backgroundColor: '#22c55e' }}></span> 
+                {currentVariant?.stock ? `Only ${currentVariant.stock} left in stock` : "In stock"}
+              </p>
+            )}
           </div>
 
           {/* Actions */}
@@ -244,10 +267,12 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
               variant="default"
               size="lg"
               onClick={handleAddToCart}
-              disabled={isPending}
-              className="w-full rounded-none uppercase text-on-primary"
+              disabled={isPending || isCurrentVariantOutOfStock()}
+              className="w-full rounded-none uppercase text-on-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span className="relative z-10">{isPending ? "Adding to Cart..." : "Add to Cart"}</span>
+              <span className="relative z-10">
+                {isPending ? "Adding to Cart..." : (isCurrentVariantOutOfStock() ? "Out of Stock" : "Add to Cart")}
+              </span>
             </Button>
             <WishlistButton
               productId={product.id}

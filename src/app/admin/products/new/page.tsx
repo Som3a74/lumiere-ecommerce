@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { ProductForm } from "@/components/admin/product-form";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import crypto from "crypto";
 
 export default async function NewProductPage() {
   const supabase = await createClient();
@@ -10,6 +11,18 @@ export default async function NewProductPage() {
     .from('categories')
     .select('id, name')
     .order('name');
+
+  const { data: colors } = await supabase
+    .from('colors')
+    .select('id, name, hex_code')
+    .order('name');
+
+  const { data: sizes } = await supabase
+    .from('sizes')
+    .select('id, name')
+    .order('name');
+
+  const initialProductId = crypto.randomUUID();
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
@@ -23,7 +36,12 @@ export default async function NewProductPage() {
         </div>
       </div>
 
-      <ProductForm categories={categories || []} />
+      <ProductForm 
+        categories={categories || []} 
+        colors={colors || []} 
+        sizes={sizes || []} 
+        initialProductId={initialProductId} 
+      />
     </div>
   );
 }

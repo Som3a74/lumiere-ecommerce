@@ -32,12 +32,20 @@ export default async function CheckoutPage() {
       id,
       quantity,
       variant_id,
+      variant:product_variants (
+        id,
+        color_id,
+        size_id,
+        color:colors(name),
+        size:sizes(name)
+      ),
       product:products (
         id,
         name,
         price,
         product_images (
           image_url,
+          color_id,
           display_order
         )
       )
@@ -48,7 +56,22 @@ export default async function CheckoutPage() {
     console.error("Error fetching cart items:", error);
   }
 
-  const items = cartItems || [];
+  const items = (cartItems || []).map(item => {
+    const variantData = Array.isArray(item.variant) ? item.variant[0] : item.variant;
+    
+    const extractName = (data: any) => {
+      if (!data) return null;
+      if (Array.isArray(data)) return data[0]?.name || null;
+      return data.name || null;
+    };
+
+    return {
+      ...item,
+      color: extractName(variantData?.color),
+      size: extractName(variantData?.size),
+      color_id: variantData?.color_id || null,
+    };
+  });
 
   // Check for coupon
   const coupon = await getAppliedCoupon();
