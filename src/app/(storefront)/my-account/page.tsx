@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+
 export default async function MyAccountPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -32,37 +36,47 @@ export default async function MyAccountPage() {
 
     recentUpdates.forEach(order => {
       const orderIdShort = order.id.split('-')[0].toUpperCase();
-      const dateStr = new Date(order.updated_at).toLocaleDateString();
+      const createdDateStr = new Date(order.created_at).toLocaleDateString();
+      const updatedDateStr = new Date(order.updated_at).toLocaleDateString();
+      const prevStatus = order.contact_info?.previous_status ? order.contact_info.previous_status.toUpperCase() : 'PENDING';
+      const statusLower = order.status ? order.status.toLowerCase() : '';
 
-      if (order.status === 'pending' || order.status === 'processing') {
+      // Show only one notification reflecting the current status
+      if (statusLower === 'pending' || statusLower === 'processing') {
         notifications.push({
-          id: `notif-${order.id}-pending`,
-          title: 'Order Confirmed',
-          message: `Your order #${orderIdShort} has been confirmed and is currently processing.`,
-          date: dateStr,
+          id: `notif-${order.id}-processing`,
+          title: 'Order Processing',
+          message: `Your order #${orderIdShort} is now PROCESSING instead of ${prevStatus}.`,
+          date: updatedDateStr,
           type: 'info'
         });
-      } else if (order.status === 'shipped') {
+      } else if (statusLower === 'shipped') {
         notifications.push({
           id: `notif-${order.id}-shipped`,
           title: 'Order Shipped',
-          message: `Good news! Your order #${orderIdShort} has been shipped.`,
-          date: dateStr,
+          message: `Good news! Your order #${orderIdShort} is now SHIPPED instead of ${prevStatus}.`,
+          date: updatedDateStr,
           type: 'success'
         });
-      } else if (order.status === 'delivered') {
+      } else if (statusLower === 'delivered') {
         notifications.push({
           id: `notif-${order.id}-delivered`,
           title: 'Order Delivered',
-          message: `Your order #${orderIdShort} has been delivered. Enjoy your purchase!`,
-          date: dateStr,
+          message: `Your order #${orderIdShort} has been updated to DELIVERED instead of ${prevStatus}. Enjoy your purchase!`,
+          date: updatedDateStr,
           type: 'success'
+        });
+      } else if (statusLower === 'cancelled') {
+        notifications.push({
+          id: `notif-${order.id}-cancelled`,
+          title: 'Order Cancelled',
+          message: `Your order #${orderIdShort} has been CANCELLED instead of ${prevStatus}.`,
+          date: updatedDateStr,
+          type: 'warning'
         });
       }
     });
   }
-
-
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">

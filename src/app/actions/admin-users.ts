@@ -22,7 +22,7 @@ export async function saveUser(formData: FormData) {
 
   if (id) {
     // Update existing user
-    const updatePayload: any = {
+    const updatePayload: Record<string, unknown> = {
       email,
       user_metadata: {
         first_name: firstName,

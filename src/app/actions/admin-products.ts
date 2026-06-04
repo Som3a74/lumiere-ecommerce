@@ -24,7 +24,7 @@ export async function saveProduct(formData: FormData, existingProductId?: string
     throw new Error("Missing required fields");
   }
 
-  const payload: any = {
+  const payload: Record<string, unknown> = {
     name,
     description,
     price,
@@ -59,7 +59,7 @@ export async function saveProduct(formData: FormData, existingProductId?: string
   // Handle colorGroups (which contain variants and images)
   if (colorGroups) {
     // Flatten colorGroups into a single array of variants
-    const flatVariants: any[] = [];
+    const flatVariants: Record<string, unknown>[] = [];
     for (const group of colorGroups) {
       if (group.sizes && group.sizes.length > 0) {
         for (const size of group.sizes) {
@@ -110,8 +110,8 @@ export async function saveProduct(formData: FormData, existingProductId?: string
     for (const variant of flatVariants) {
       const variantId = variant.id;
       
-      let sku = variant.sku || "";
-      if (sku.startsWith("[AUTO]")) {
+      let sku = (variant.sku as string) || "";
+      if (typeof sku === 'string' && sku.startsWith("[AUTO]")) {
         sku = sku.replace("[AUTO]", `PROD-${newProductId.substring(0,4).toUpperCase()}`);
       } else if (!sku) {
         sku = `PROD-${newProductId.substring(0,4).toUpperCase()}-${variant.color_id || 'BASE'}-${variant.size_id || 'BASE'}`;
@@ -136,7 +136,7 @@ export async function saveProduct(formData: FormData, existingProductId?: string
     await supabase.from('product_images').delete().eq('product_id', newProductId);
 
     const uniqueImages = new Set<string>();
-    const imagesToInsert: any[] = [];
+    const imagesToInsert: Record<string, unknown>[] = [];
     
     for (const group of colorGroups) {
       if (group.images && group.images.length > 0) {

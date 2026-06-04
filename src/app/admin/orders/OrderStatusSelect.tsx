@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { updateOrderStatus } from "@/app/actions/admin-orders";
 import { toast } from "sonner";
 import {
@@ -26,8 +26,14 @@ const STATUSES = [
 
 export default function OrderStatusSelect({ orderId, currentStatus }: OrderStatusSelectProps) {
   const [isUpdating, setIsUpdating] = useState(false);
+  const [status, setStatus] = useState(currentStatus);
+
+  useEffect(() => {
+    setStatus(currentStatus);
+  }, [currentStatus]);
 
   const handleStatusChange = async (newStatus: string) => {
+    setStatus(newStatus);
     setIsUpdating(true);
     const result = await updateOrderStatus(orderId, newStatus);
     setIsUpdating(false);
@@ -35,13 +41,14 @@ export default function OrderStatusSelect({ orderId, currentStatus }: OrderStatu
     if (result.success) {
       toast.success(result.message);
     } else {
+      setStatus(currentStatus);
       toast.error(result.message || "Failed to update status");
     }
   };
 
   return (
     <Select
-      defaultValue={currentStatus}
+      value={status}
       onValueChange={handleStatusChange}
       disabled={isUpdating}
     >

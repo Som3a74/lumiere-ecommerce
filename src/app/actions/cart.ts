@@ -75,7 +75,8 @@ export async function addToCart(productId: string, options?: { variantId?: strin
       ]);
 
     if (insertError) {
-      return { error: "Failed to add item to cart" };
+      console.error("Insert error in addToCart:", insertError);
+      return { error: `Failed to add item to cart: ${insertError.message}` };
     }
   }
 

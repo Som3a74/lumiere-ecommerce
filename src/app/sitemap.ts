@@ -11,9 +11,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .select('id, updated_at')
     .is('deleted_at', null);
     
+  const { data: categories } = await supabase
+    .from('categories')
+    .select('name, updated_at')
+    .is('deleted_at', null);
+    
   const productUrls = (products || []).map((product) => ({
     url: `${baseUrl}/product/${product.id}`,
-    lastModified: new Date(product.updated_at),
+    lastModified: new Date(product.updated_at || new Date()),
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }));
+  
+  const categoryUrls = (categories || []).map((category) => ({
+    url: `${baseUrl}/collections?category=${encodeURIComponent(category.name)}`,
+    lastModified: new Date(category.updated_at || new Date()),
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   }));
@@ -39,5 +51,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
   
-  return [...staticUrls, ...productUrls];
+  return [...staticUrls, ...categoryUrls, ...productUrls];
 }

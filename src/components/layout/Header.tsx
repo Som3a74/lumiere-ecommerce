@@ -14,7 +14,7 @@ const NAV_LINKS = [
   { name: "About Us", href: "/about" },
 ];
 
-export function Header({ user, isAdmin }: { user?: any, isAdmin?: boolean }) {
+export function Header({ user, isAdmin }: { user?: { id: string; email?: string } | null, isAdmin?: boolean }) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 

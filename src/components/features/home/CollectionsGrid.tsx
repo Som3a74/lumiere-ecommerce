@@ -12,7 +12,6 @@ export function CollectionsGrid() {
         {/* Large Image Left */}
         <div className="md:col-span-7 relative group overflow-hidden fade-in-section">
           <div className="aspect-[4/5] bg-surface-container w-full h-full">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <Image
               width={1920}
               height={1080}
@@ -32,7 +31,6 @@ export function CollectionsGrid() {
         <div className="md:col-span-5 flex flex-col gap-gutter">
           <div className="relative group overflow-hidden flex-1 fade-in-section" style={{ transitionDelay: "100ms" }}>
             <div className="bg-surface-container w-full h-full min-h-[300px]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <Image
                 width={1920}
                 height={1080}

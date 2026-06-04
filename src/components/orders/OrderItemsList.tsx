@@ -33,9 +33,9 @@ export function OrderItemsList({ items }: OrderItemsListProps) {
           
           // Find thumbnail based on ordered variant color
           const variantColor = item.variant?.color;
-          const matchingImages = product.product_images?.filter((img: any) => !variantColor || img.color === variantColor);
+          const matchingImages = product.product_images?.filter((img: { image_url: string; is_thumbnail: boolean; color?: string }) => !variantColor || img.color === variantColor);
           
-          const thumbnail = matchingImages?.find((img: any) => img.is_thumbnail)?.image_url 
+          const thumbnail = matchingImages?.find((img: { image_url: string; is_thumbnail: boolean; color?: string }) => img.is_thumbnail)?.image_url 
             || matchingImages?.[0]?.image_url
             || product.product_images?.[0]?.image_url 
             || "/placeholder-image.jpg";

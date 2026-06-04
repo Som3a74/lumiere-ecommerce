@@ -143,7 +143,9 @@ function CheckoutForm({ userProfile, cartItems, totals, coupon }: Omit<CheckoutC
       // 2. Place Order in our Database
       const paymentInfo = {
         id: paymentIntent.id,
-        method: paymentIntent.payment_method,
+        method: typeof paymentIntent.payment_method === 'string' 
+          ? paymentIntent.payment_method 
+          : paymentIntent.payment_method?.id || undefined,
         status: paymentIntent.status,
       };
 
