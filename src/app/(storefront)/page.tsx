@@ -20,7 +20,7 @@ export default function Home() {
         '@type': 'Organization',
         name: 'LUMIÈRE GENÈVE',
         url: process.env.NEXT_PUBLIC_SITE_URL || 'https://lumiere.com',
-        logo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://lumiere.com'}/assets/images/logo.png`,
+        logo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://lumiere.com'}/assets/images/logo.webp`,
       },
       {
         '@type': 'WebSite',

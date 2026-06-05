@@ -6,7 +6,7 @@ export function AboutHero() {
     <section className="relative h-[80vh] min-h-[600px] w-full overflow-hidden">
       <div className="absolute inset-0 bg-primary/30 z-10"></div>
       <Image
-        src="/assets/images/home/hero-image.png"
+        src="/assets/images/home/hero-image.webp"
         alt="A cinematic, low-key close-up of a master watchmaker's weathered hands delicately assembling the intricate movement of a luxury timepiece."
         fill
         sizes="100vw"

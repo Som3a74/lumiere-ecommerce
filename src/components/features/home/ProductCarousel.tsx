@@ -60,7 +60,7 @@ export async function ProductCarousel({ type, title }: ProductCarouselProps) {
     description: product.description || "",
     price: `$${product.price?.toLocaleString()}`,
     category: (Array.isArray(product.categories) ? product.categories[0] : product.categories)?.name || "Uncategorized",
-    image: product.product_images?.[0]?.image_url || "/assets/images/logo.png",
+    image: product.product_images?.[0]?.image_url || "/assets/images/logo.webp",
     isWishlisted: userWishlist.includes(product.id),
   }));
 

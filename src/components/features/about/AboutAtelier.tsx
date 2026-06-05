@@ -6,7 +6,7 @@ export function AboutAtelier() {
     <section className="relative h-[80vh] min-h-[600px] flex items-center bg-primary overflow-hidden">
       <div
         className="absolute inset-0 opacity-50 bg-fixed bg-center bg-no-repeat bg-cover"
-        style={{ backgroundImage: "url('/assets/images/about/Mastery in Every Stitch.png')" }}
+        style={{ backgroundImage: "url('/assets/images/about/Mastery in Every Stitch.webp')" }}
         title="A dramatic close-up macro shot of fine leather stitching being performed on high-end leather goods."
       ></div>
       <div className="relative z-10 max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop w-full grid grid-cols-1 md:grid-cols-2">

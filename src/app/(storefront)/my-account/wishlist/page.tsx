@@ -29,7 +29,7 @@ export default async function WishlistPage() {
     id: item.products.id,
     title: item.products.name,
     price: `$${item.products.price.toLocaleString()}`,
-    imageUrl: item.products.product_images?.[0]?.image_url || "/assets/images/logo.png",
+    imageUrl: item.products.product_images?.[0]?.image_url || "/assets/images/logo.webp",
   }));
 
   return (

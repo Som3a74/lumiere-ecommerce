@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       description: product.description?.substring(0, 160) || `Buy ${product.name} at Lumiere.`,
       images: [
         {
-          url: product.product_images?.[0]?.image_url || "/assets/images/logo.png",
+          url: product.product_images?.[0]?.image_url || "/assets/images/logo.webp",
           width: 800,
           height: 600,
           alt: product.name,
@@ -171,7 +171,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     id: p.id,
     title: p.name,
     price: `$${p.price.toLocaleString()}`,
-    imageUrl: p.product_images?.[0]?.image_url || "/assets/images/logo.png",
+    imageUrl: p.product_images?.[0]?.image_url || "/assets/images/logo.webp",
     isWishlisted: userWishlist.includes(p.id),
   }));
 

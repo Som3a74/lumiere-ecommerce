@@ -17,7 +17,7 @@ export function CollectionsGrid() {
               height={1080}
               alt="Luxury Timepiece"
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              src="/assets/images/home/Timepieces.png"
+              src="/assets/images/home/Timepieces.webp"
             />
           </div>
           <div className="absolute inset-0 bg-black/10 transition-opacity duration-300 group-hover:bg-black/20"></div>
@@ -36,7 +36,7 @@ export function CollectionsGrid() {
                 height={1080}
                 alt="Leather Goods"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                src="/assets/images/home/Leather Goods.png"
+                src="/assets/images/home/Leather Goods.webp"
               />
             </div>
             <div className="absolute inset-0 bg-black/10 transition-opacity duration-300 group-hover:bg-black/20"></div>

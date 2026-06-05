@@ -126,7 +126,7 @@ export default async function CollectionsPage({ searchParams }: { searchParams: 
     title: product.name,
     price: `$${product.price.toLocaleString()}`,
     category: (Array.isArray(product.categories) ? product.categories[0] : product.categories)?.name || "Uncategorized",
-    imageUrl: product.product_images?.[0]?.image_url || "/assets/images/logo.png",
+    imageUrl: product.product_images?.[0]?.image_url || "/assets/images/logo.webp",
     href: `/product/${product.id}`,
     isWishlisted: userWishlist.includes(product.id),
   }));

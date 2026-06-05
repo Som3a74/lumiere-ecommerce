@@ -21,7 +21,7 @@ export function BrandHeritage() {
             alt="Craftsmanship"
             className="w-full h-full object-cover transition-transform duration-[2s] ease-out group-hover:scale-110"
             style={{ transformOrigin: "center center" }}
-            src="/assets/images/home/A Legacy of Light.png"
+            src="/assets/images/home/A Legacy of Light.webp"
           />
         </div>
       </div>

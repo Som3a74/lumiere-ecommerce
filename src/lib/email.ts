@@ -16,7 +16,7 @@ const getBaseHtml = (title: string, customerName: string, content: string) => {
   return `
     <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border: 1px solid #eeeeee;">
       <div style="text-align: center; padding-bottom: 30px; border-bottom: 1px solid #eeeeee;">
-        <img src="${siteUrl}/assets/images/logo.png" alt="LUMIERE" style="height: 35px; width: auto; object-fit: contain;" />
+        <img src="${siteUrl}/assets/images/logo.webp" alt="LUMIERE" style="height: 35px; width: auto; object-fit: contain;" />
       </div>
       <div style="padding: 30px 0; color: #333333; line-height: 1.6; font-size: 14px;">
         <h1 style="font-size: 18px; font-weight: 300; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; color: #111111; text-align: center;">

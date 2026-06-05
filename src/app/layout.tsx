@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     siteName: "LUMIÈRE GENÈVE",
     images: [
       {
-        url: "/assets/images/logo.png",
+        url: "/assets/images/logo.webp",
         width: 800,
         height: 600,
       },
