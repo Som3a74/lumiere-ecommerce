@@ -106,12 +106,13 @@ export default function CartClient({ cartItems, totals, coupon }: CartClientProp
 
             return (
               <div key={item.id} className="flex flex-col sm:flex-row gap-6 pb-8 border-b border-surface-container">
-                <div className="w-full sm:w-40 h-40 bg-surface-dim overflow-hidden flex-shrink-0">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                <div className="w-full sm:w-40 h-40 bg-surface-dim overflow-hidden flex-shrink-0 relative">
+                  <Image
+                    fill
+                    sizes="(max-width: 640px) 100vw, 160px"
                     alt={product?.name || "Product"}
                     src={imageUrl}
-                    className="w-full h-full object-cover"
+                    className="object-cover"
                   />
                 </div>
 

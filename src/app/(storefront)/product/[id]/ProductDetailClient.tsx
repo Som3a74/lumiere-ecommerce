@@ -146,9 +146,11 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
                 onClick={() => setSelectedImage(img)}
                 className={`w-20 h-24 md:w-24 md:h-32 shrink-0 border relative overflow-hidden group ${selectedImage === img ? "border-primary" : "border-transparent hover:border-surface-dim transition-colors"}`}
               >
-                <img
+                <Image
+                  fill
+                  sizes="96px"
                   alt={`Thumbnail ${i + 1}`}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
                   src={img}
                 />
               </button>
@@ -159,8 +161,10 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
             className="w-full bg-surface-bright zoom-container"
             onMouseMove={handleMouseMove}
           >
-            <img
+            <Image
               alt={product.title}
+              width={800}
+              height={1000}
               className="w-full h-auto object-cover zoom-image"
               style={{ transformOrigin }}
               src={selectedImage}

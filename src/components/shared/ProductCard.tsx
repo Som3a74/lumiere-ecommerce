@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { WishlistButton } from "@/components/shared/WishlistButton";
 
@@ -28,12 +29,13 @@ export function ProductCard({
   return (
     <article className={cn("group cursor-pointer", className)}>
       <div className="relative bg-surface-container-low mb-6 overflow-hidden aspect-3/4">
-        <Link href={href} className="block w-full h-full">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+        <Link href={href} className="block w-full h-full relative">
+          <Image
             alt={imageAlt || title}
-            className="object-cover w-full h-full transition-transform duration-700 ease-out group-hover:scale-105"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             src={imageUrl}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         </Link>
         {productId && (

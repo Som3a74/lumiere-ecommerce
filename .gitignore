@@ -42,5 +42,6 @@ next-env.d.ts
 
 HANDOFF.md
 .agents
+.vscode
 CLAUDE.md
 AGENTS.md

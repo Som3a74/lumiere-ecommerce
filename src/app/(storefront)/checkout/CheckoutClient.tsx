@@ -275,11 +275,12 @@ function CheckoutForm({ userProfile, cartItems, totals, coupon }: Omit<CheckoutC
 
                 return (
                   <div key={item.id} className="flex gap-4">
-                    <div className="w-24 h-24 bg-surface-dim overflow-hidden flex-shrink-0">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                    <div className="w-24 h-24 bg-surface-dim overflow-hidden flex-shrink-0 relative">
+                      <Image
+                        fill
+                        sizes="96px"
                         alt={item.product?.name || "Product Image"}
-                        className="w-full h-full object-cover"
+                        className="object-cover"
                         src={imageUrl}
                       />
                     </div>

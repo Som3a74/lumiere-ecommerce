@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/utils/supabase/server";
 import { WishlistButton } from "@/components/shared/WishlistButton";
 
@@ -43,11 +44,12 @@ export default async function WishlistPage() {
           {wishlistItems.map((item) => (
             <div key={item.id} className="group cursor-pointer flex flex-col">
               <div className="relative aspect-[3/4] bg-surface-container overflow-hidden mb-6">
-                <Link href={`/product/${item.id}`}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                <Link href={`/product/${item.id}`} className="block w-full h-full relative">
+                  <Image
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     alt={item.title}
-                    className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-700 ease-in-out"
+                    className="object-cover transform group-hover:scale-105 transition-transform duration-700 ease-in-out"
                     src={item.imageUrl}
                   />
                 </Link>

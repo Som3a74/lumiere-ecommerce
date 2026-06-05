@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { createClient } from "@/utils/supabase/client";
 import {
   CommandDialog,
@@ -167,12 +168,13 @@ export function SearchModal() {
                   onSelect={() => handleSelectProduct(product.id)}
                   className="flex items-center gap-4 py-3 cursor-pointer"
                 >
-                  <div className="w-12 h-12 bg-surface-dim overflow-hidden flex-shrink-0 rounded-sm">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                  <div className="w-12 h-12 bg-surface-dim overflow-hidden flex-shrink-0 rounded-sm relative">
+                    <Image
                       src={product.product_images?.[0]?.image_url || "/placeholder-image.jpg"}
                       alt={product.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      sizes="48px"
                     />
                   </div>
                   <div className="flex-grow flex justify-between items-center">
@@ -192,12 +194,13 @@ export function SearchModal() {
                   onSelect={() => handleSelectProduct(product.id)}
                   className="flex items-center gap-4 py-3 cursor-pointer"
                 >
-                  <div className="w-12 h-12 bg-surface-dim overflow-hidden flex-shrink-0 rounded-sm">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                  <div className="w-12 h-12 bg-surface-dim overflow-hidden flex-shrink-0 rounded-sm relative">
+                    <Image
                       src={product.product_images?.[0]?.image_url || "/placeholder-image.jpg"}
                       alt={product.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      sizes="48px"
                     />
                   </div>
                   <div className="flex-grow flex justify-between items-center">

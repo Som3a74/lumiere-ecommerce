@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
 import { Plus } from "lucide-react";
+import Image from "next/image";
 import { DataTable, Column } from "@/components/admin/data-table";
 import { ProductActions } from "@/components/admin/product-actions";
 
@@ -27,10 +28,9 @@ export default async function AdminProductsPage() {
       className: "font-medium text-primary",
       cell: (item) => (
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-surface-variant/20 border border-outline-variant/30 overflow-hidden flex-shrink-0">
+          <div className="w-12 h-12 bg-surface-variant/20 border border-outline-variant/30 overflow-hidden flex-shrink-0 relative">
             {item.product_images?.[0]?.image_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={item.product_images[0].image_url} alt={item.name} className="w-full h-full object-cover" />
+              <Image src={item.product_images[0].image_url} alt={item.name} fill sizes="48px" className="object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-xs text-on-surface-variant">No Img</div>
             )}

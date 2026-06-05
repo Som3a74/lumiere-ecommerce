@@ -3,6 +3,7 @@ import { useFormContext, useFieldArray } from "react-hook-form";
 import { Loader2, Plus, Trash2, Upload, Image as ImageIcon } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -372,8 +373,7 @@ export function ProductVariantsSection({
             <div className="flex gap-4 overflow-x-auto pb-2">
               {watchedColorGroups?.[index]?.images?.map((imgUrl: string, imgIndex: number) => (
                 <div key={imgIndex} className="relative group w-24 h-24 flex-shrink-0 border border-outline-variant/30 bg-surface-variant/20">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={imgUrl} alt="Variant image" className="object-cover w-full h-full" />
+                  <Image src={imgUrl} alt="Variant image" fill sizes="96px" className="object-cover" />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <Button
                       type="button"

@@ -6,6 +6,7 @@ import { createClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -114,8 +115,7 @@ export function ImageManager({ productId, images, colors }: ImageManagerProps) {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
           {images.map((img) => (
             <div key={img.id} className="relative group aspect-square border border-outline-variant/30 bg-surface-variant/20 overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={img.image_url} alt="Product image" className="object-cover w-full h-full" />
+              <Image src={img.image_url} alt="Product image" fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover" />
               
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2">
                 <span className="text-white text-xs font-medium uppercase tracking-wider bg-black/50 px-2 py-1 self-start">

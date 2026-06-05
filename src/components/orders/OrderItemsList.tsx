@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 interface OrderItem {
   id: string;
@@ -42,11 +43,12 @@ export function OrderItemsList({ items }: OrderItemsListProps) {
 
           return (
             <div key={item.id} className="flex flex-col sm:flex-row gap-6 pb-8 border-b border-surface-container last:border-0 last:pb-0">
-              <div className="w-full sm:w-32 h-32 bg-surface-dim overflow-hidden flex-shrink-0">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+              <div className="w-full sm:w-32 h-32 bg-surface-dim overflow-hidden flex-shrink-0 relative">
+                <Image
+                  fill
+                  sizes="(max-width: 640px) 100vw, 128px"
                   alt={product.name}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700 ease-out"
+                  className="object-cover hover:scale-105 transition-transform duration-700 ease-out"
                   src={thumbnail}
                 />
               </div>

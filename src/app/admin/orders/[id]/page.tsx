@@ -1,6 +1,7 @@
 import { getAdminOrderDetails } from "@/app/actions/admin-orders";
 import OrderStatusSelect from "../OrderStatusSelect";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
@@ -64,9 +65,8 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
 
                 return (
                   <div key={item.id} className="flex gap-4 border-b border-surface-container-high pb-6 last:border-0 last:pb-0">
-                    <div className="w-20 h-20 bg-surface-dim flex-shrink-0">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={imageUrl} alt={item.product?.name} className="w-full h-full object-cover" />
+                    <div className="w-20 h-20 bg-surface-dim flex-shrink-0 relative">
+                      <Image src={imageUrl} alt={item.product?.name} fill sizes="80px" className="object-cover" />
                     </div>
                     <div className="flex-grow flex flex-col justify-between">
                       <div>
