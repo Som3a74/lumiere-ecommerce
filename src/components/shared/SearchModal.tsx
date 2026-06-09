@@ -137,19 +137,19 @@ export function SearchModal() {
           {!searchQuery && (
             <div className="px-4 py-4 border-b border-surface-container flex flex-wrap gap-2">
               <span className="text-[10px] uppercase tracking-widest text-secondary font-label-caps mr-2 flex items-center">Quick Filters:</span>
-              <button 
+              <button
                 onClick={() => handleSelectPage("/collections?category=Watches")}
                 className="text-xs bg-surface-container-low hover:bg-surface-container text-primary px-3 py-1 rounded-full transition-colors"
               >
                 Watches
               </button>
-              <button 
+              <button
                 onClick={() => handleSelectPage("/collections?price=under_1000")}
                 className="text-xs bg-surface-container-low hover:bg-surface-container text-primary px-3 py-1 rounded-full transition-colors"
               >
                 Under $1,000
               </button>
-              <button 
+              <button
                 onClick={() => handleSelectPage("/collections?sort=newest")}
                 className="text-xs bg-surface-container-low hover:bg-surface-container text-primary px-3 py-1 rounded-full transition-colors"
               >
