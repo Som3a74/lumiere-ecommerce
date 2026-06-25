@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { ReviewsSection } from "./ReviewsSection";
+import { VirtualTryOnButton } from "@/features/products/components/VirtualTryOnButton";
 
 export default function ProductDetailPage({ product, relatedProducts }: { product: any, relatedProducts: any[] }) {
   const [transformOrigin, setTransformOrigin] = useState("center center");
@@ -278,6 +279,7 @@ export default function ProductDetailPage({ product, relatedProducts }: { produc
                 {isPending ? "Adding to Cart..." : (isCurrentVariantOutOfStock() ? "Out of Stock" : "Add to Cart")}
               </span>
             </Button>
+            <VirtualTryOnButton productImage={selectedImage} />
             <WishlistButton
               productId={product.id}
               initialIsWishlisted={product.isWishlisted}
