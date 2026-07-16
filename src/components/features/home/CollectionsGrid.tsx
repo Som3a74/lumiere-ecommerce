@@ -50,7 +50,7 @@ export function CollectionsGrid() {
             <span className="material-symbols-outlined text-4xl text-tertiary-fixed-dim mb-4" style={{ fontVariationSettings: "'wght' 200" }}>diamond</span>
             <h3 className="font-headline-md text-headline-md text-primary mb-3">Bespoke Services</h3>
             <p className="font-body-md text-body-md text-secondary mb-6">Commission a piece uniquely tailored to your uncompromising standards.</p>
-            <a className="luxury-button font-label-caps text-label-caps text-primary uppercase tracking-widest py-2" href="#">Inquire Now</a>
+            <a className="luxury-button font-label-caps text-label-caps text-primary uppercase tracking-widest py-2" href="/about">Inquire Now</a>
           </div>
         </div>
       </div>
