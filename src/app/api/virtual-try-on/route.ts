@@ -27,10 +27,10 @@ export async function POST(req: Request) {
     const productArrayBuffer = await productResponse.arrayBuffer();
     const productBuffer = Buffer.from(productArrayBuffer);
     const jpegBuffer = await sharp(productBuffer).jpeg().toBuffer();
-    const productBlob = new Blob([jpegBuffer], { type: 'image/jpeg' });
+    const productBlob = new Blob([new Uint8Array(jpegBuffer)], { type: 'image/jpeg' });
 
     // Connect to Hugging Face with the token using OOTDiffusion space
-    const app = await Client.connect("eduardo4547/OOTDiffusion", { hf_token: process.env.HF_TOKEN as any });
+    const app = await Client.connect("eduardo4547/OOTDiffusion", { token: process.env.HF_TOKEN as any });
 
     const result = await app.predict("/process_hd", {
       vton_img: handle_file(userImageBlob),
